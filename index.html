@@ -92,6 +92,7 @@
             { id: 'truck', name: '트럭', icon: <Icon name="Truck" className="w-6 h-6" />, base: 45000, kmRate: 1200 },
         ];
 
+        // 톤수 확장 반영 (image_431f43.png 기준)
         const TONS = [
             { id: '1ton', name: '1t', multiplier: 1.0, base: 45000 },
             { id: '1.4ton', name: '1.4t', multiplier: 1.15, base: 55000 },
@@ -100,34 +101,66 @@
             { id: '5ton', name: '5t', multiplier: 2.8, base: 150000 },
             { id: '8ton', name: '8t', multiplier: 3.5, base: 180000 },
             { id: '11ton', name: '11t', multiplier: 4.5, base: 220000 },
-            { id: '18ton', name: '18t', multiplier: 5.5, base: 280000 },
-            { id: '25ton', name: '25t', multiplier: 6.5, base: 350000 },
+            { id: '14ton', name: '14t', multiplier: 5.2, base: 260000 },
+            { id: '15ton', name: '15t', multiplier: 5.5, base: 280000 },
+            { id: '18ton', name: '18t', multiplier: 6.0, base: 320000 },
+            { id: '25ton', name: '25t', multiplier: 7.0, base: 380000 },
         ];
 
+        // 트럭 세부 제원 전수 반영 (image_431f43.png 기준)
         const VEHICLE_TYPES = [
-            { group: '카고계열', types: [
+            { group: '기본 및 카고계열', types: [
+                { id: 'all', name: '전체', surcharge: 0 },
+                { id: 'cargo_wing', name: '카고/윙', surcharge: 10000 },
                 { id: 'cargo', name: '카고', surcharge: 0 },
                 { id: 'plus_cargo', name: '플러스카고', surcharge: 10000 },
                 { id: 'chuk_cargo', name: '축카고', surcharge: 20000 },
+                { id: 'plus_chuk_cargo', name: '플축카고', surcharge: 30000 },
+                { id: 'plus_ri', name: '플러스리', surcharge: 20000 },
+                { id: 'chuk_ri', name: '플축리', surcharge: 35000 },
             ]},
-            { group: '윙바디계열', types: [
+            { group: '윙바디 계열', types: [
                 { id: 'wing', name: '윙바디', surcharge: 20000 },
                 { id: 'plus_wing', name: '플러스윙', surcharge: 30000 },
                 { id: 'chuk_wing', name: '축윙', surcharge: 40000 },
+                { id: 'plus_chuk_wing', name: '플축윙', surcharge: 50000 },
+                { id: 'plus_wing_ri', name: '플러스윙리', surcharge: 40000 },
+                { id: 'plus_chuk_wing_ri', name: '플축윙리', surcharge: 60000 },
+                { id: 'plus_chuk_cargo_wing', name: '플축카고/윙', surcharge: 40000 },
             ]},
-            { group: '탑/냉동계열', types: [
-                { id: 'top', name: '탑차', surcharge: 10000 },
+            { group: '탑 및 냉동/냉장 계열', types: [
+                { id: 'top', name: '탑', surcharge: 10000 },
+                { id: 'plus_top', name: '리프트탑', surcharge: 35000 },
                 { id: 'freezer_top', name: '냉동탑', surcharge: 40000 },
+                { id: 'fridge_top', name: '냉장탑', surcharge: 30000 },
+                { id: 'freezer_top_ri', name: '냉동탑리', surcharge: 60000 },
+                { id: 'fridge_top_ri', name: '냉장탑리', surcharge: 50000 },
                 { id: 'freezer_wing', name: '냉동윙', surcharge: 50000 },
+                { id: 'fridge_wing', name: '냉장윙', surcharge: 40000 },
+                { id: 'freezer_plus_chuk_wing', name: '냉동플축윙', surcharge: 70000 },
+                { id: 'fridge_plus_chuk_wing', name: '냉장플축윙', surcharge: 60000 },
+                { id: 'freezer_plus_chuk_ri', name: '냉동플축리', surcharge: 80000 },
+                { id: 'fridge_plus_chuk_ri', name: '냉장플축리', surcharge: 70000 },
             ]},
-            { group: '특수/리프트', types: [
+            { group: '특수 및 리프트 계열', types: [
                 { id: 'lift_cargo', name: '리프트카고', surcharge: 30000 },
                 { id: 'lift_wing', name: '리프트윙', surcharge: 45000 },
+                { id: 'horu', name: '호루', surcharge: 10000 },
+                { id: 'lift_horu', name: '리프트호루', surcharge: 30000 },
+                { id: 'jabara', name: '자바라', surcharge: 15000 },
+                { id: 'lift_jabara', name: '리프트자바라', surcharge: 35000 },
+                { id: 'peongka', name: '펑카', surcharge: 50000 },
+                { id: 'low_v', name: '로브이', surcharge: 50000 },
+                { id: 'trailer', name: '츄레라', surcharge: 100000 },
+                { id: 'lowbed', name: '로베드', surcharge: 120000 },
+                { id: 'ladder', name: '사다리', surcharge: 60000 },
                 { id: 'extra_long', name: '초장축', surcharge: 20000 },
+                { id: 'wide', name: '광폭', surcharge: 30000 },
             ]}
         ];
 
         const ITEM_CATEGORIES = [
+            { id: 'manual', name: '고객수작업', icon: '🤲', sizes: [] },
             { id: 'pallet', name: '파레트', icon: '📦', sizes: ['1100*1100', '1200*1000', 'KPP규격', '기타'] },
             { id: 'box', name: '박스', icon: '📥', sizes: ['소형', '중형', '대형', '특대형'] },
             { id: 'furniture', name: '가구/가전', icon: '🛋️', sizes: ['1인용', '가족형', '대형가전'] },
@@ -156,11 +189,11 @@
             const [isPassenger, setIsPassenger] = useState(false);
             const [isRoundTrip, setIsRoundTrip] = useState(false);
             const [waypointCount, setWaypointCount] = useState(0);
-            const [weatherType, setWeatherType] = useState('none'); // 'none', 'rain', 'snow'
+            const [weatherType, setWeatherType] = useState('none'); 
 
             const [selectedItemCat, setSelectedItemCat] = useState(ITEM_CATEGORIES[0]);
             const [itemQty, setItemQty] = useState(1);
-            const [itemSize, setItemSize] = useState(ITEM_CATEGORIES[0].sizes[0]);
+            const [itemSize, setItemSize] = useState('');
             const [itemWeight, setItemWeight] = useState(0.1);
 
             const [isPostcodeVisible, setIsPostcodeVisible] = useState(false);
@@ -219,42 +252,47 @@
                 }
             }, [startPoint, endPoint]);
 
+            const tollFee = useMemo(() => {
+                if (!startPoint.address || !endPoint.address) return 0;
+                let fee = 0;
+                const highTollKeywords = ["인천공항", "영종도", "운서동", "인천대교", "영종대교", "신불IC"];
+                const hasHighToll = highTollKeywords.some(kw => startPoint.address.includes(kw) || endPoint.address.includes(kw));
+                if (hasHighToll) fee += 12000;
+                if (distance > 30) {
+                    fee += Math.floor((distance - 30) / 20) * 2000 + 3000;
+                }
+                return fee;
+            }, [startPoint.address, endPoint.address, distance]);
+
             const calculation = useMemo(() => {
                 let baseFare = selectedCategory.base;
                 let multiplier = 1.0;
-
                 if (selectedCategory.id === 'truck') {
                     baseFare = selectedTon.base;
                     multiplier = selectedTon.multiplier;
                 }
-
                 const kmRate = selectedCategory.kmRate;
                 let distFare = Math.max(0, distance - 10) * kmRate * multiplier;
-                
                 let total = baseFare + distFare;
-
-                // 기본 옵션 합산
                 total += selectedType.surcharge;
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
-                
-                // 경유지 합산 (경유 1곳당 1만원)
                 if (waypointCount > 0) total += (waypointCount * 10000);
-
-                // 왕복 할증 (1.7배)
-                if (isRoundTrip) total *= 1.7;
-
-                // 기상 할증 (우천/강설 시 20% 할증)
+                
+                // 왕복 할증 (1.5배로 수정)
+                if (isRoundTrip) total *= 1.5;
+                
+                // 기상 할증 (20% 할증)
                 if (weatherType !== 'none') total *= 1.2;
-
+                
+                total += tollFee;
                 return Math.floor(total / 100) * 100;
-            }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, weatherType]);
+            }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, weatherType, tollFee]);
 
             const formatPrice = (p) => new Intl.NumberFormat('ko-KR').format(p);
 
             return (
                 <div className="min-h-screen p-4 md:p-8">
-                    {/* Header */}
                     <header className="max-w-7xl mx-auto mb-8 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className="bg-[#1E293B] p-4 rounded-[20px] text-white shadow-lg flex items-center justify-center">
@@ -357,43 +395,51 @@
                                 </div>
                             </section>
 
-                            {/* 03. 화물 물품 정보 */}
                             <section className="itgo-card p-7 rounded-[32px]">
                                 <h2 className="text-[11px] font-black text-slate-400 mb-6 uppercase tracking-widest flex items-center gap-2">
                                     <Icon name="Package" className="w-3.5 h-3.5 text-blue-500" /> 03. 화물 물품 정보
                                 </h2>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
                                     {ITEM_CATEGORIES.map(cat => (
-                                        <button key={cat.id} onClick={() => { setSelectedItemCat(cat); setItemSize(cat.sizes[0]); }} className={`flex flex-col items-center py-4 rounded-[22px] border-2 transition-all ${selectedItemCat.id === cat.id ? 'border-slate-800 bg-slate-800 text-white shadow-sm' : 'border-slate-50 bg-slate-50/50 text-slate-400'}`}>
-                                            <span className="text-xl mb-1">{cat.icon}</span>
+                                        <button 
+                                            key={cat.id} 
+                                            onClick={() => {
+                                                setSelectedItemCat(cat);
+                                                setItemSize(cat.sizes?.[0] || '');
+                                            }} 
+                                            className={`flex flex-col items-center py-5 rounded-[22px] border-2 transition-all ${selectedItemCat.id === cat.id ? 'border-slate-800 bg-slate-800 text-white shadow-sm' : 'border-slate-50 bg-slate-50/50 text-slate-400'}`}
+                                        >
+                                            <span className="text-2xl mb-1">{cat.icon}</span>
                                             <span className="font-bold text-[11px]">{cat.name}</span>
                                         </button>
                                     ))}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 ml-1">개수입력</label>
-                                        <div className="flex items-center bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                                            <input type="number" value={itemQty} onChange={(e) => setItemQty(parseInt(e.target.value) || 1)} className="w-full px-4 py-3 text-center font-bold text-sm outline-none bg-transparent" />
+
+                                {selectedItemCat.id !== 'manual' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/50 p-6 rounded-3xl border border-slate-100 animate-in fade-in slide-in-from-top-2">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate-500 ml-1">개수입력</label>
+                                            <div className="flex items-center bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                                                <input type="number" value={itemQty} onChange={(e) => setItemQty(parseInt(e.target.value) || 1)} className="w-full px-4 py-3 text-center font-bold text-sm outline-none bg-transparent" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate-500 ml-1">규격선택</label>
+                                            <select value={itemSize} onChange={(e) => setItemSize(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none shadow-sm cursor-pointer">
+                                                {selectedItemCat.sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate-500 ml-1">중량(t)입력</label>
+                                            <div className="relative">
+                                                <input type="number" step="0.1" value={itemWeight} onChange={(e) => setItemWeight(parseFloat(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none shadow-sm" />
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300">ton</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 ml-1">규격선택</label>
-                                        <select value={itemSize} onChange={(e) => setItemSize(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none shadow-sm cursor-pointer">
-                                            {selectedItemCat.sizes.map(s => <option key={s} value={s}>{s}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 ml-1">중량(t)입력</label>
-                                        <div className="relative">
-                                            <input type="number" step="0.1" value={itemWeight} onChange={(e) => setItemWeight(parseFloat(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none shadow-sm" />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300">ton</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                )}
                             </section>
 
-                            {/* 04. 상하차 방법 및 동승여부 */}
                             <section className="itgo-card p-7 rounded-[32px]">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -425,17 +471,16 @@
                                                 </div>
                                                 <span className={`text-xs font-bold ${selectedMethod.id === opt.id ? 'text-blue-700' : 'text-slate-600'}`}>{opt.name}</span>
                                             </div>
-                                            <p className="text-[10px] text-slate-400 leading-tight font-medium h-8 overflow-hidden">{opt.desc}</p>
+                                            <p className="text-[10px] text-slate-400 leading-tight font-medium min-h-[3rem]">{opt.desc}</p>
                                         </button>
                                     ))}
                                 </div>
 
-                                {/* 왕복, 경유, 기상 할증 섹션 */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <input type="checkbox" checked={isRoundTrip} onChange={() => setIsRoundTrip(!isRoundTrip)} className="w-4 h-4 accent-blue-600 cursor-pointer" id="roundTrip" />
-                                            <label htmlFor="roundTrip" className="text-xs font-bold text-slate-700 cursor-pointer">왕복 운행 (1.7배)</label>
+                                            <label htmlFor="roundTrip" className="text-xs font-bold text-slate-700 cursor-pointer">왕복 운행 (1.5배)</label>
                                         </div>
                                     </div>
 
@@ -470,7 +515,6 @@
                             </section>
                         </div>
 
-                        {/* 우측 단가 노출 영역 */}
                         <div className="lg:col-span-4 lg:sticky lg:top-8">
                             <div className="bg-[#1E293B] rounded-[40px] p-8 text-white shadow-2xl shadow-blue-900/10 border border-slate-800">
                                 <div className="flex justify-between items-center mb-12">
@@ -496,30 +540,40 @@
 
                                     <div className="space-y-4 p-5 bg-white/5 rounded-[28px] border border-white/5">
                                         <div className="flex justify-between items-center text-xs">
-                                            <span className="opacity-40">선택 차량</span>
+                                            <span className="opacity-40 font-bold uppercase tracking-tighter">선택 차량</span>
                                             <span className="font-bold text-blue-400">{selectedCategory.name} {selectedCategory.id === 'truck' ? selectedTon.name : ''}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="opacity-40">운송 옵션</span>
-                                            <span className="font-bold text-slate-300">{selectedMethod.name} {isPassenger && '+ 동승'}</span>
+                                        <div className="flex justify-between items-start text-xs">
+                                            <span className="opacity-40 mt-0.5 font-bold uppercase tracking-tighter">운송 옵션</span>
+                                            <div className="text-right">
+                                                <p className="font-bold text-slate-300">
+                                                    {selectedMethod.name}
+                                                    {selectedMethod.price > 0 && <span className="text-blue-400 ml-1.5">+{formatPrice(selectedMethod.price)}원</span>}
+                                                </p>
+                                                {isPassenger && <p className="text-[10px] text-blue-400 font-bold mt-1">+ 동승 1인 (+10,000원)</p>}
+                                            </div>
                                         </div>
-                                        { (waypointCount > 0 || isRoundTrip || weatherType !== 'none') && (
-                                            <div className="flex flex-wrap gap-2 pt-1">
-                                                {isRoundTrip && <span className="text-[9px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-bold">왕복</span>}
+                                        { (waypointCount > 0 || isRoundTrip || weatherType !== 'none' || tollFee > 0) && (
+                                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-1">
+                                                {isRoundTrip && <span className="text-[9px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-bold">왕복 할증 (1.5x)</span>}
                                                 {waypointCount > 0 && <span className="text-[9px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-bold">경유 {waypointCount}곳</span>}
-                                                {weatherType !== 'none' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">{weatherType === 'rain' ? '우천할증' : '강설할증'}</span>}
+                                                {weatherType === 'rain' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">우천할증 (20%)</span>}
+                                                {weatherType === 'snow' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">강설할증 (20%)</span>}
+                                                {tollFee > 0 && <span className="text-[9px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full font-bold">유료도로 포함</span>}
                                             </div>
                                         )}
                                         <div className="flex justify-between items-center text-[10px] pt-4 border-t border-white/5">
-                                            <span className="opacity-40 uppercase tracking-tighter">Cargo Summary</span>
-                                            <span className="font-bold text-slate-400">{selectedItemCat.name} | {itemQty}개</span>
+                                            <span className="opacity-40 uppercase tracking-tighter font-bold">Cargo Summary</span>
+                                            <span className="font-bold text-slate-400">
+                                                {selectedItemCat.name} {selectedItemCat.id !== 'manual' && `| ${itemQty}개`}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="bg-white/10 rounded-[32px] p-8 backdrop-blur-xl border border-white/10 mb-8 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-12 -mt-12" />
-                                    <p className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-3">Total Quote</p>
+                                    <p className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-3">Total Estimated Price</p>
                                     <div className="flex items-baseline justify-between">
                                         <span className="text-4xl font-black tracking-tighter text-white">{formatPrice(calculation)}</span>
                                         <span className="text-lg font-bold opacity-30 italic">KRW</span>
@@ -528,10 +582,12 @@
 
                                 <button 
                                     onClick={() => {
-                                        const weatherTxt = weatherType !== 'none' ? ` | 기상할증(${weatherType === 'rain' ? '우천' : '강설'})` : '';
+                                        const weatherTxt = weatherType !== 'none' ? ` | 기상할증(${weatherType === 'rain' ? '우천20%' : '강설20%'})` : '';
                                         const waypointTxt = waypointCount > 0 ? ` | 경유 ${waypointCount}곳` : '';
-                                        const roundTxt = isRoundTrip ? ' | 왕복' : '';
-                                        const text = `[잇고 itgo 견적] ${startPoint.address.split(' ')[1] || '출발지'}➝${endPoint.address.split(' ')[1] || '도착지'}${waypointTxt}${roundTxt}${weatherTxt} | ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''} ${selectedType.name} | 거리: ${distance}km | 운임: ${formatPrice(calculation)}원`;
+                                        const roundTxt = isRoundTrip ? ' | 왕복(1.5배)' : '';
+                                        const tollTxt = tollFee > 0 ? ` | 톨비포함` : '';
+                                        const itemDetail = selectedItemCat.id !== 'manual' ? ` | 수량: ${itemQty} | 규격: ${itemSize}` : '';
+                                        const text = `[잇고 itgo 견적] ${startPoint.address.split(' ')[1] || '출발지'}➝${endPoint.address.split(' ')[1] || '도착지'}${waypointTxt}${roundTxt}${weatherTxt}${tollTxt} | ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''} ${selectedType.name} | 옵션: ${selectedMethod.name} | 물품: ${selectedItemCat.name}${itemDetail} | 거리: ${distance}km | 운임: ${formatPrice(calculation)}원`;
                                         navigator.clipboard.writeText(text);
                                         alert('견적 정보가 클립보드에 복사되었습니다.');
                                     }} 
@@ -543,7 +599,7 @@
                                 <div className="mt-10 pt-6 border-t border-white/5 flex items-start gap-3">
                                     <Icon name="Info" className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
                                     <p className="text-[10px] text-slate-500 leading-relaxed font-bold">
-                                        위 요금은 전국 화물 운송 플랫폼의 실시간 할증 요율을 반영한 결과입니다. 기사님 배차 시점에 따라 상세 금액은 소폭 변동될 수 있습니다.
+                                        본 요금은 업계 평균 데이터를 기반으로 산출된 내부 가이드입니다. 실제 기사님 배차 시 도로 상황, 야간 할증, 기상 변수에 따라 소폭 변동될 수 있습니다.
                                     </p>
                                 </div>
                             </div>
@@ -565,11 +621,11 @@
                                 <div ref={postcodeContainerRef} className="w-full flex-1 bg-white relative">
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 gap-4">
                                         <div className="loading-spin" />
-                                        <p className="text-[11px] font-black tracking-widest uppercase opacity-50">Loading Kakao API...</p>
+                                        <p className="text-[11px] font-black tracking-widest uppercase opacity-50">Connecting Kakao API...</p>
                                     </div>
                                 </div>
                                 <div className="p-5 bg-slate-50 text-center text-[9px] text-slate-400 font-black uppercase tracking-[0.3em] border-t border-slate-100">
-                                    itgo Address Search Engine
+                                    itgo Logistics Intelligence
                                 </div>
                             </div>
                         </div>
