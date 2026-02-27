@@ -91,26 +91,26 @@
             return icons[name] || null;
         };
 
-        // --- 업계 평균 단가 데이터 (타사 대비 최적화 튜닝) ---
+        // --- 요율 데이터 ---
         const CATEGORIES = [
-            { id: 'motorcycle', name: '오토바이 퀵', icon: <Icon name="Bike" className="w-6 h-6" />, base: 12000, kmRate: 850 }, // 38km 시 약 3.5만 산출
-            { id: 'damas', name: '다마스', icon: <Icon name="Box" className="w-6 h-6" />, base: 25000, kmRate: 650 }, // 38km 시 약 4만 산출
-            { id: 'labo', name: '라보', icon: <Icon name="Truck" className="w-6 h-6" />, base: 28000, kmRate: 750 }, // 38km 시 약 4.5만 산출
-            { id: 'truck', name: '트럭', icon: <Icon name="Truck" className="w-6 h-6" />, base: 45000, kmRate: 900 }, // 38km 시 약 6.5만 산출
+            { id: 'motorcycle', name: '오토바이 퀵', icon: <Icon name="Bike" className="w-6 h-6" />, base: 14000, kmRate: 1050 }, 
+            { id: 'damas', name: '다마스', icon: <Icon name="Box" className="w-6 h-6" />, base: 18000, kmRate: 1100 }, 
+            { id: 'labo', name: '라보', icon: <Icon name="Truck" className="w-6 h-6" />, base: 22000, kmRate: 1150 }, 
+            { id: 'truck', name: '트럭', icon: <Icon name="Truck" className="w-6 h-6" />, base: 35000, kmRate: 1500 }, 
         ];
 
         const TONS = [
-            { id: '1ton', name: '1t', multiplier: 1.0, base: 45000 },
-            { id: '1.4ton', name: '1.4t', multiplier: 1.2, base: 50000 },
-            { id: '2.5ton', name: '2.5t', multiplier: 1.6, base: 80000 },
-            { id: '3.5ton', name: '3.5t', multiplier: 2.1, base: 100000 },
-            { id: '5ton', name: '5t', multiplier: 3.0, base: 150000 },
-            { id: '8ton', name: '8t', multiplier: 3.8, base: 180000 },
-            { id: '11ton', name: '11t', multiplier: 4.8, base: 220000 },
-            { id: '14ton', name: '14t', multiplier: 5.5, base: 250000 },
-            { id: '15ton', name: '15t', multiplier: 5.8, base: 270000 },
-            { id: '18ton', name: '18t', multiplier: 6.5, base: 300000 },
-            { id: '25ton', name: '25t', multiplier: 7.5, base: 350000 },
+            { id: '1ton', name: '1t', multiplier: 1.0, base: 35000 },
+            { id: '1.4ton', name: '1.4t', multiplier: 1.15, base: 40000 },
+            { id: '2.5ton', name: '2.5t', multiplier: 1.6, base: 70000 },
+            { id: '3.5ton', name: '3.5t', multiplier: 1.9, base: 85000 },
+            { id: '5ton', name: '5t', multiplier: 2.8, base: 130000 },
+            { id: '8ton', name: '8t', multiplier: 3.5, base: 160000 },
+            { id: '11ton', name: '11t', multiplier: 4.5, base: 200000 },
+            { id: '14ton', name: '14t', multiplier: 5.2, base: 230000 },
+            { id: '15ton', name: '15t', multiplier: 5.5, base: 250000 },
+            { id: '18ton', name: '18t', multiplier: 6.5, base: 290000 },
+            { id: '25ton', name: '25t', multiplier: 7.5, base: 340000 },
         ];
 
         const VEHICLE_TYPES = [
@@ -161,6 +161,7 @@
                 { id: 'ladder', name: '사다리', surcharge: 60000 },
                 { id: 'extra_long', name: '초장축', surcharge: 20000 },
                 { id: 'wide', name: '광폭', surcharge: 30000 },
+                { id: 'plus_chuk_cargo_wing', name: '플축카고/윙', surcharge: 40000 },
             ]}
         ];
 
@@ -255,7 +256,6 @@
                 }
             }, [selectedCategory]);
 
-            // --- 타사 수준 거리 보정 (Haversine * 1.25) ---
             useEffect(() => {
                 if (startPoint.x && endPoint.x) {
                     const R = 6371; 
@@ -265,23 +265,16 @@
                               Math.cos(startPoint.y * (Math.PI/180)) * Math.cos(endPoint.y * (Math.PI/180)) *
                               Math.sin(dLon/2) * Math.sin(dLon/2);
                     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                    
-                    // 타사 주행거리 보정을 위해 가중치 1.25 적용
-                    setDistance(Math.max(1, Math.round(R * c * 1.25))); 
+                    setDistance(Math.max(1, Math.round(R * c))); 
                 }
             }, [startPoint, endPoint]);
 
             const tollFee = useMemo(() => {
                 if (!startPoint.address || !endPoint.address) return 0;
-                let fee = 0;
-                const highTollKeywords = ["인천공항", "영종도", "운서동", "인천대교", "영종대교", "신불IC"];
-                const hasHighToll = highTollKeywords.some(kw => startPoint.address.includes(kw) || endPoint.address.includes(kw));
-                if (hasHighToll) fee += 12000;
-                if (distance > 30) {
-                    fee += Math.floor((distance - 30) / 20) * 2000 + 3000;
-                }
-                return fee;
-            }, [startPoint.address, endPoint.address, distance]);
+                const islandKeywords = ["인천공항", "운서동", "영종도", "용유도", "운남동", "운북동", "중산동", "남북동", "덕교동", "을왕동", "무의동"];
+                const isCrossingBridge = islandKeywords.some(kw => startPoint.address.includes(kw) || endPoint.address.includes(kw));
+                return isCrossingBridge ? 12000 : 0;
+            }, [startPoint.address, endPoint.address]);
 
             const calculation = useMemo(() => {
                 let baseFare = selectedCategory.base;
@@ -291,15 +284,12 @@
                     multiplier = selectedTon.multiplier;
                 }
                 const kmRate = selectedCategory.kmRate;
-                // km당 운임 계산 (10km 기본 제공 후 km당 과금)
-                let distFare = Math.max(0, distance - 10) * kmRate * (selectedCategory.id === 'truck' ? selectedTon.multiplier : 1);
+                let distFare = Math.max(0, distance - 10) * kmRate * (selectedCategory.id === 'truck' ? (selectedTon.multiplier * 0.8) : 1);
                 let total = baseFare + distFare;
-                
                 total += selectedType.surcharge;
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
                 if (waypointCount > 0) total += (waypointCount * 10000);
-                
                 if (isRoundTrip) total *= 1.5;
                 if (weatherType !== 'none') total *= 1.2;
                 total += tollFee;
@@ -310,11 +300,65 @@
                 } else {
                     finalTotal = Math.floor(total / 5000) * 5000;
                 }
-
                 return finalTotal;
             }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, weatherType, tollFee]);
 
             const formatPrice = (p) => new Intl.NumberFormat('ko-KR').format(p);
+
+            // --- 고객 전송용 예쁜 텍스트 생성 로직 ---
+            const handleCopyQuote = () => {
+                const startAddr = startPoint.address || '(미입력)';
+                const endAddr = endPoint.address || '(미입력)';
+                const vehicle = `${selectedCategory.name}${selectedCategory.id === 'truck' ? ` (${selectedTon.name})` : ''}`;
+                const specs = selectedType.name;
+                const options = [];
+                if (selectedMethod.price > 0) options.push(`${selectedMethod.name} (+${formatPrice(selectedMethod.price)}원)`);
+                if (isPassenger) options.push('동승 1인 (+10,000원)');
+                if (waypointCount > 0) options.push(`경유지 ${waypointCount}곳 (+${formatPrice(waypointCount * 10000)}원)`);
+                if (isRoundTrip) options.push('왕복 운행 (1.5배 적용)');
+                if (weatherType === 'rain') options.push('우천 할증 (20% 적용)');
+                if (weatherType === 'snow') options.push('강설 할증 (20% 적용)');
+                if (tollFee > 0) options.push('인천대교 톨게이트 비용 포함');
+
+                const optionTxt = options.length > 0 ? options.map(opt => `- ${opt}`).join('\n') : '- 없음';
+                const itemDetail = selectedItemCat.id !== 'manual' ? `${selectedItemCat.name} (${itemQty}개 / ${itemSize})` : selectedItemCat.name;
+
+                const copyMessage = `[itgo] 잇고 운송 견적 안내
+
+📍 구간 정보
+- 상차: ${startAddr}
+- 하차: ${endAddr}
+- 거리: ${distance}km (직선거리)
+
+🚛 차량 정보
+- 종류: ${vehicle}
+- 상세: ${specs}
+
+📦 화물 정보
+- 품목: ${itemDetail}
+
+✨ 선택 옵션
+${optionTxt}
+
+💰 최종 운임
+- ${formatPrice(calculation)}원 (VAT포함)
+
+* 위 견적은 실시간 수급 상황 및 도로 상황에 따라 변동될 수 있습니다.
+잇고(itgo)를 이용해 주셔서 감사합니다.`;
+
+                // 시스템 지침에 따른 iFrame 대응 복사 로직
+                const textArea = document.createElement("textarea");
+                textArea.value = copyMessage;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('견적 정보가 예쁘게 복사되었습니다!\n고객님께 바로 붙여넣기 하세요.');
+                } catch (err) {
+                    alert('복사에 실패했습니다. 다시 시도해 주세요.');
+                }
+                document.body.removeChild(textArea);
+            };
 
             return (
                 <div className="min-h-screen p-4 md:p-8">
@@ -336,10 +380,9 @@
 
                     <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-20">
                         <div className="lg:col-span-8 space-y-6">
-                            {/* 01. 구간지 설정 */}
                             <section className="itgo-card p-7 rounded-[32px]">
                                 <h2 className="text-[11px] font-black text-slate-400 mb-6 uppercase tracking-widest flex items-center gap-2">
-                                    <Icon name="Navigation" className="w-3.5 h-3.5 text-blue-500" /> 01. 운송 구간지 설정 (AI 도로망 가중치 적용)
+                                    <Icon name="Navigation" className="w-3.5 h-3.5 text-blue-500" /> 01. 운송 구간지 설정 (직선거리 산출)
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div onClick={() => openPostcode('start')} className="group cursor-pointer">
@@ -567,7 +610,7 @@
 
                                 <div className="space-y-8 mb-10">
                                     <div>
-                                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5 opacity-80">Road Distance Calculation</p>
+                                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5 opacity-80">Estimated Distance</p>
                                         <div className="flex items-baseline gap-1.5">
                                             <span className="text-5xl font-black tracking-tighter">{distance}</span>
                                             <span className="text-xl font-bold opacity-30 italic">km</span>
@@ -595,7 +638,7 @@
                                                 {waypointCount > 0 && <span className="text-[9px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-bold">경유 {waypointCount}곳</span>}
                                                 {weatherType === 'rain' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">우천할증 (20%)</span>}
                                                 {weatherType === 'snow' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">강설할증 (20%)</span>}
-                                                {tollFee > 0 && <span className="text-[9px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full font-bold">유료도로 포함</span>}
+                                                {tollFee > 0 && <span className="text-[9px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full font-bold">인천대교 톨비 포함</span>}
                                             </div>
                                         )}
                                         <div className="flex justify-between items-center text-[10px] pt-4 border-t border-white/5">
@@ -609,7 +652,7 @@
 
                                 <div className="bg-white/10 rounded-[32px] p-8 backdrop-blur-xl border border-white/10 mb-8 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-12 -mt-12" />
-                                    <p className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-3">Estimated Price (AI)</p>
+                                    <p className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-3">Total Estimated Price (AI)</p>
                                     <div className="flex items-baseline justify-between">
                                         <span className="text-4xl font-black tracking-tighter text-white">{formatPrice(calculation)}</span>
                                         <span className="text-lg font-bold opacity-30 italic">KRW</span>
@@ -617,16 +660,7 @@
                                 </div>
 
                                 <button 
-                                    onClick={() => {
-                                        const weatherTxt = weatherType !== 'none' ? ` | 기상할증(${weatherType === 'rain' ? '우천20%' : '강설20%'})` : '';
-                                        const waypointTxt = waypointCount > 0 ? ` | 경유 ${waypointCount}곳` : '';
-                                        const roundTxt = isRoundTrip ? ' | 왕복(1.5배)' : '';
-                                        const tollTxt = tollFee > 0 ? ` | 톨비포함` : '';
-                                        const itemDetail = selectedItemCat.id !== 'manual' ? ` | 수량: ${itemQty} | 규격: ${itemSize}` : '';
-                                        const text = `[잇고 itgo 견적] ${startPoint.address.split(' ')[1] || '출발지'}➝${endPoint.address.split(' ')[1] || '도착지'}${waypointTxt}${roundTxt}${weatherTxt}${tollTxt} | ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''} ${selectedType.name} | 옵션: ${selectedMethod.name} | 물품: ${selectedItemCat.name}${itemDetail} | 거리: ${distance}km | 운임: ${formatPrice(calculation)}원`;
-                                        navigator.clipboard.writeText(text);
-                                        alert('견적 정보가 클립보드에 복사되었습니다.');
-                                    }} 
+                                    onClick={handleCopyQuote} 
                                     className="w-full py-5 bg-blue-600 text-white rounded-[26px] font-black text-base hover:bg-blue-500 transition-all active:scale-95 shadow-xl shadow-blue-900/20"
                                 >
                                     견적 내역 복사하기
@@ -635,7 +669,7 @@
                                 <div className="mt-10 pt-6 border-t border-white/5 flex items-start gap-3">
                                     <Icon name="Info" className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
                                     <p className="text-[10px] text-slate-500 leading-relaxed font-bold">
-                                        본 요금은 타사 도로망 가중치 및 AI 추천 단가를 반영하여 산출되었습니다. 실제 배차 시 기사님 수급 및 상황에 따라 최종 금액은 소폭 변동될 수 있습니다.
+                                        본 요금은 영종도/용유도 전역의 인천대교 통행료 및 타사 단가 데이터를 반영한 최적화 가이드입니다. 복사 버튼을 눌러 고객님께 바로 전달하세요.
                                     </p>
                                 </div>
                             </div>
