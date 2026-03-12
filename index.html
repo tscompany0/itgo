@@ -262,35 +262,41 @@
                             const encodedUserId = encodeURIComponent(INSUNG_USER_ID);
                             const targetUrl = `${INSUNG_API_URL}?type=json&m_code=${INSUNG_M_CODE}&cc_code=${INSUNG_CC_CODE}&token=${INSUNG_TOKEN}&user_id=${encodedUserId}&distance=${distance}`;
                             
-                            // 🚀 브라우저 CORS(보안) 에러를 우회하기 위해 공개 프록시를 거쳐 호출합니다. (필수)
-                            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+                            // 🚀 1. 보안 에러(CORS) 우회를 위해 AllOrigins 프록시 사용 (안정성 높음)
+                            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
                             
                             const response = await fetch(proxyUrl);
+                            if (!response.ok) throw new Error("프록시 서버 응답 에러");
+                            
                             const data = await response.json();
+                            console.log("📡 인성데이타 API 응답:", data); // F12 개발자도구 확인용
                             
                             let costData = Array.isArray(data) ? (data.find(item => item.basic_cost !== undefined) || data[1] || data[0]) : data;
                             
                             if (costData && costData.basic_cost !== undefined) {
                                 setInsungCosts(costData); // 실제 인성데이타 요금 반영
                             } else {
-                                throw new Error("요금 정보 없음");
+                                // 인성 API에서 요금을 안 주고 에러 코드를 준 경우
+                                throw new Error(data[0]?.msg || "응답에 요금 정보가 없습니다.");
                             }
                         } catch (error) {
-                            console.error("인성데이타 통신 오류:", error);
-                            showToast("인성데이타 통신에 실패하여 임시 단가표로 계산됩니다.");
+                            console.error("❌ 인성데이타 통신 오류:", error);
                             
-                            // Fallback mock data if API fails
+                            // 팝업으로 정확한 에러 원인 안내
+                            showToast(`인성 API 연동 실패 (${error.message}). 임시 단가로 계산됩니다.`);
+                            
+                            // 🚀 2. 임시 단가표를 실제(범양물류) 수준과 비슷하게 하향 조정 (트럭 45km 기준 약 7만원)
                             setInsungCosts({
-                                basic_cost: distance * 700 + 9000,
-                                damas_cost: distance * 900 + 25000,
-                                labo_cost: distance * 1000 + 30000,
-                                truck_cost: distance * 1200 + 45000,
-                                cargo_1_4_cost: distance * 1300 + 55000,
-                                cargo_2_5_cost: distance * 1500 + 80000,
-                                cargo_3_5_cost: distance * 1800 + 100000,
-                                cargo_5_cost: distance * 2200 + 150000,
-                                cargo_11_cost: distance * 3200 + 220000,
-                                cargo_25_cost: distance * 4500 + 350000
+                                basic_cost: distance * 500 + 10000,
+                                damas_cost: distance * 600 + 20000,
+                                labo_cost: distance * 650 + 25000,
+                                truck_cost: distance * 600 + 40000,       // 45km * 600 + 40000 = 67,000원
+                                cargo_1_4_cost: distance * 700 + 45000,
+                                cargo_2_5_cost: distance * 800 + 55000,
+                                cargo_3_5_cost: distance * 900 + 65000,
+                                cargo_5_cost: distance * 1100 + 80000,
+                                cargo_11_cost: distance * 1500 + 110000,
+                                cargo_25_cost: distance * 2200 + 150000
                             });
                         } finally {
                             setIsFetchingQuote(false);
