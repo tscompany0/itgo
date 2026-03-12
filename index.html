@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>itgo - 잇고 통합 단가 매니저</title>
+    <title>통합 단가 매니저</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -45,7 +45,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        .itgo-card {
+        .content-card {
             background: white;
             border: 1px solid rgba(226, 232, 240, 0.8);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
@@ -53,11 +53,11 @@
         }
         
         .section-title {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 900;
             color: #64748B;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.1em;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -93,13 +93,11 @@
         };
 
         // --- 마스터 단가표 데이터 (단위: 만원) ---
-        // 사용자의 요청에 따라 이미지의 1톤 단가를 한 단계씩 상향 조정하여 50km=7만으로 맞춤
         const PRICING_DATA = {
             motorcycle: [[5, 1.2], [10, 1.7], [20, 2.2], [30, 2.7], [50, 3.7]],
             damas: [[5, 2.5], [10, 3.0], [20, 3.5], [30, 4.0], [50, 5.0], [70, 6.0], [90, 8.0]],
             labo: [[5, 3.0], [10, 3.5], [20, 4.0], [30, 5.0], [50, 6.0], [70, 7.0], [90, 9.0], [110, 10.0]],
             trucks: {
-                // 1톤: 15km(5), 30km(6), 50km(7), 70km(8)... 사용자 요청 반영
                 '1ton': [[15, 5], [30, 6], [50, 7], [70, 8], [90, 9], [110, 10], [130, 11], [150, 12], [170, 13], [200, 14], [220, 15], [250, 16], [300, 18], [350, 20], [400, 22], [450, 24], [500, 27], [550, 30], [600, 33]],
                 '1.4ton': [[15, 6], [30, 7], [50, 8], [70, 9], [90, 10], [110, 11], [130, 12], [150, 13], [170, 14], [200, 15], [220, 17], [250, 18], [300, 20], [350, 22], [400, 23], [450, 25], [500, 29], [550, 31], [600, 33]],
                 '2.5ton': [[15, 7], [30, 8], [50, 9], [70, 10], [90, 12], [110, 14], [130, 15], [150, 16], [170, 17], [200, 19], [220, 21], [250, 24], [300, 27], [350, 29], [400, 31], [450, 33], [500, 35], [550, 37], [600, 39]],
@@ -120,17 +118,18 @@
             { id: 'truck', name: '트럭', img: 'truck.jpg' },
         ];
 
+        // 차량 제원 로직 최대치 반영 수정 (폭 x 길이 미터 기준)
         const TONS = [
-            { id: '1ton', name: '1t (1.6*2.8)', table: PRICING_DATA.trucks['1ton'] },
-            { id: '1.4ton', name: '1.4t (1.7*3.1)', table: PRICING_DATA.trucks['1.4ton'] },
-            { id: '2.5ton', name: '2.5t (1.8*4.3)', table: PRICING_DATA.trucks['2.5ton'] },
-            { id: '3.5ton', name: '3.5t (2*4.6)', table: PRICING_DATA.trucks['3.5ton'] },
-            { id: '5ton', name: '5t (2.2*6.2)', table: PRICING_DATA.trucks['5ton'] },
-            { id: '5ton_plus', name: '5t 플러스 (2.2*7.4)', table: PRICING_DATA.trucks['5ton_plus'] },
-            { id: '5ton_chuk', name: '5t 축 (2.2*7.4)', table: PRICING_DATA.trucks['5ton_chuk'] },
-            { id: '11ton', name: '11t (2.3*9.1)', table: PRICING_DATA.trucks['11ton'] },
-            { id: '18ton', name: '18t (2.3*10)', table: PRICING_DATA.trucks['18ton'] },
-            { id: '25ton', name: '25t (2.3*10)', table: PRICING_DATA.trucks['25ton'] },
+            { id: '1ton', name: '1t (폭 1.6m * 길이 2.8m)', table: PRICING_DATA.trucks['1ton'] },
+            { id: '1.4ton', name: '1.4t (폭 1.7m * 길이 3.1m)', table: PRICING_DATA.trucks['1.4ton'] },
+            { id: '2.5ton', name: '2.5t (폭 1.9m * 길이 4.3m)', table: PRICING_DATA.trucks['2.5ton'] },
+            { id: '3.5ton', name: '3.5t (폭 2.0m * 길이 4.8m)', table: PRICING_DATA.trucks['3.5ton'] },
+            { id: '5ton', name: '5t (폭 2.3m * 길이 6.2m)', table: PRICING_DATA.trucks['5ton'] },
+            { id: '5ton_plus', name: '5t 플러스 (폭 2.3m * 길이 7.4m)', table: PRICING_DATA.trucks['5ton_plus'] },
+            { id: '5ton_chuk', name: '5t 축 (폭 2.3m * 길이 8.5m)', table: PRICING_DATA.trucks['5ton_chuk'] },
+            { id: '11ton', name: '11t (폭 2.4m * 길이 9.6m)', table: PRICING_DATA.trucks['11ton'] },
+            { id: '18ton', name: '18t (폭 2.4m * 길이 10.2m)', table: PRICING_DATA.trucks['18ton'] },
+            { id: '25ton', name: '25t (폭 2.4m * 길이 10.2m)', table: PRICING_DATA.trucks['25ton'] },
         ];
 
         const VEHICLE_TYPES = [
@@ -172,14 +171,12 @@
 
         const KAKAO_API_KEY = '1452d4f7d1995e5c8d57c8c7261cfee0';
 
-        // --- 요금 계산 알고리즘 (선형 보간 및 올림 적용) ---
+        // --- 요금 계산 알고리즘 ---
         const getInterpolatedPrice = (table, dist) => {
             if (!table || table.length === 0) return 0;
             
-            // 1. 최소 거리보다 작을 때
             if (dist <= table[0][0]) return table[0][1] * 10000;
             
-            // 2. 최대 거리보다 클 때
             const lastIdx = table.length - 1;
             if (dist >= table[lastIdx][0]) {
                 const overKm = dist - table[lastIdx][0];
@@ -189,7 +186,6 @@
                 return (table[lastIdx][1] + (overKm * perKmRate)) * 10000;
             }
             
-            // 3. 중간 거리 (선형 보간 - 거리 비례 할증)
             for (let i = 0; i < table.length - 1; i++) {
                 const startDist = table[i][0];
                 const endDist = table[i+1][0];
@@ -204,8 +200,13 @@
         };
 
         function App() {
+            // 상차지/하차지 상태 관리에 이름/연락처 추가
             const [startPoint, setStartPoint] = useState({ address: '', x: null, y: null });
+            const [startInfo, setStartInfo] = useState({ name: '', phone: '' });
+            
             const [endPoint, setEndPoint] = useState({ address: '', x: null, y: null });
+            const [endInfo, setEndInfo] = useState({ name: '', phone: '' });
+
             const [distance, setDistance] = useState(0); 
             const [isDistanceLoading, setIsDistanceLoading] = useState(false);
 
@@ -301,29 +302,21 @@
                 if (distance === 0) return 0;
                 let total = 0;
 
-                // 🚀 핵심 로직: 거리 5km 단위 올림 적용 (45.82 -> 50)
                 const distForCalc = Math.ceil(distance / 5) * 5;
 
-                // 1. 단가표 기반 기본 운송료 계산
                 if (selectedCategory.id === 'truck') {
                     total = getInterpolatedPrice(selectedTon.table, distForCalc);
                 } else {
                     total = getInterpolatedPrice(PRICING_DATA[selectedCategory.id], distForCalc);
                 }
 
-                // 2. 부가 옵션 합산 (기존 할증 유지)
                 total += selectedType.surcharge;
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
                 if (waypointCount > 0) total += (waypointCount * 10000);
-
-                // 3. 왕복 할증 (1.7배)
                 if (isRoundTrip) total *= 1.7;
-
-                // 4. 기상 할증 (20%)
                 if (weatherType !== 'none') total *= 1.2;
 
-                // 🚀 최종 금액: 사용자가 요청한 "거리 비례 할증"이므로 5,000원 단위 올림 제거 후 1,000원 단위 정리
                 return Math.floor(total / 1000) * 1000;
             }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, weatherType]);
 
@@ -335,7 +328,25 @@
             };
 
             const copyQuote = () => {
-                const text = `[잇고 itgo 견적]\n상차: ${startPoint.address}\n하차: ${endPoint.address}\n차량: ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''}\n거리: ${distance}km (계산기준: ${Math.ceil(distance/5)*5}km)\n예상운임: ${formatPrice(calculation)}원`;
+                // 견적서 복사 시 텍스트 구성 수정 및 고객정보 포함
+                const startNameStr = startInfo.name ? `\n- 고객명(상호): ${startInfo.name}` : '';
+                const startPhoneStr = startInfo.phone ? `\n- 연락처: ${startInfo.phone}` : '';
+                const endNameStr = endInfo.name ? `\n- 고객명(상호): ${endInfo.name}` : '';
+                const endPhoneStr = endInfo.phone ? `\n- 연락처: ${endInfo.phone}` : '';
+
+                const text = `[화물 운송 견적서]
+
+[출발지 (상차)]
+- 주소: ${startPoint.address || '미지정'}${startNameStr}${startPhoneStr}
+
+[도착지 (하차)]
+- 주소: ${endPoint.address || '미지정'}${endNameStr}${endPhoneStr}
+
+[운송 정보]
+- 차량: ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''}
+- 거리: ${distance}km (계산기준: ${Math.ceil(distance/5)*5}km)
+- 예상운임: ${formatPrice(calculation)}원`;
+
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 document.body.appendChild(textarea);
@@ -360,20 +371,17 @@
 
                     <header className="max-w-7xl mx-auto mb-12 flex items-center justify-between">
                         <div className="flex items-center gap-5">
-                            <div className="bg-white p-3 rounded-[24px] shadow-xl flex items-center justify-center overflow-hidden w-20 h-20 md:w-24 md:h-24">
-                                <img src="itgo.jpg" alt="itgo logo" className="w-full h-full object-contain" onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.parentNode.innerHTML = '<span class="text-xl font-black italic">itgo</span>';
-                                }} />
+                            <div className="bg-blue-600 p-3 rounded-[24px] shadow-xl flex items-center justify-center overflow-hidden w-20 h-20 md:w-24 md:h-24">
+                                <Icon name="Truck" className="w-10 h-10 text-white" />
                             </div>
                             <div className="hidden sm:block">
-                                <h1 className="text-xl font-black tracking-tight italic">잇고 통합 단가 매니저</h1>
-                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-0.5">Reliable Freight Solution</p>
+                                <h1 className="text-xl font-black tracking-tight">통합 단가 매니저</h1>
+                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-0.5">빠르고 안전한 화물 운송 솔루션</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-6">
                             <div className="text-right hidden lg:block">
-                                <p className="text-[10px] text-slate-400 font-black mb-0.5 uppercase">Customer Center</p>
+                                <p className="text-[10px] text-slate-400 font-black mb-0.5 uppercase">고객센터</p>
                                 <p className="text-lg font-black text-blue-600">1844-1562</p>
                             </div>
                             <button onClick={() => window.location.reload()} className="p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-blue-600 transition-all shadow-sm">
@@ -384,33 +392,43 @@
 
                     <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pb-24">
                         <div className="lg:col-span-8 space-y-8">
-                            {/* 01. 구간지 설정 */}
-                            <section className="itgo-card p-8 rounded-[40px]">
-                                <h2 className="section-title"><Icon name="Navigation" className="w-4 h-4 text-blue-500" /> 01. 상/하차지 설정</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div onClick={() => openPostcode('start')} className="group cursor-pointer">
-                                        <p className="text-[11px] font-bold text-slate-400 mb-3 ml-1">출발지 (상차)</p>
-                                        <div className="p-5 bg-slate-50 border border-slate-100 rounded-3xl group-hover:border-blue-500 group-hover:bg-white transition-all flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-blue-500"><Icon name="MapPin" className="w-6 h-6" /></div>
+                            {/* 01. 구간지 설정 (고객정보 입력란 포함) */}
+                            <section className="content-card p-8 rounded-[40px]">
+                                <h2 className="section-title"><Icon name="Navigation" className="w-4 h-4 text-blue-500" /> 01. 출발지/도착지 및 고객정보 설정</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* 출발지 */}
+                                    <div className="space-y-4">
+                                        <p className="text-[12px] font-bold text-slate-500 ml-1">출발지 (상차)</p>
+                                        <div onClick={() => openPostcode('start')} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-white transition-all flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-blue-500"><Icon name="MapPin" className="w-5 h-5" /></div>
                                             <span className={`text-sm font-bold truncate flex-1 ${startPoint.address ? 'text-slate-900' : 'text-slate-300'}`}>
                                                 {startPoint.address || '주소를 검색해 주세요 *'}
                                             </span>
                                         </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input type="text" placeholder="고객명(상호)" value={startInfo.name} onChange={(e) => setStartInfo({...startInfo, name: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-colors" />
+                                            <input type="tel" placeholder="연락처" value={startInfo.phone} onChange={(e) => setStartInfo({...startInfo, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-colors" />
+                                        </div>
                                     </div>
-                                    <div onClick={() => openPostcode('end')} className="group cursor-pointer">
-                                        <p className="text-[11px] font-bold text-slate-400 mb-3 ml-1">도착지 (하차)</p>
-                                        <div className="p-5 bg-slate-50 border border-slate-100 rounded-3xl group-hover:border-orange-500 group-hover:bg-white transition-all flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-orange-500"><Icon name="MapPin" className="w-6 h-6" /></div>
+                                    {/* 도착지 */}
+                                    <div className="space-y-4">
+                                        <p className="text-[12px] font-bold text-slate-500 ml-1">도착지 (하차)</p>
+                                        <div onClick={() => openPostcode('end')} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:border-orange-500 hover:bg-white transition-all flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-orange-500"><Icon name="MapPin" className="w-5 h-5" /></div>
                                             <span className={`text-sm font-bold truncate flex-1 ${endPoint.address ? 'text-slate-900' : 'text-slate-300'}`}>
                                                 {endPoint.address || '주소를 검색해 주세요 *'}
                                             </span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input type="text" placeholder="고객명(상호)" value={endInfo.name} onChange={(e) => setEndInfo({...endInfo, name: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-orange-500 focus:bg-white transition-colors" />
+                                            <input type="tel" placeholder="연락처" value={endInfo.phone} onChange={(e) => setEndInfo({...endInfo, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-orange-500 focus:bg-white transition-colors" />
                                         </div>
                                     </div>
                                 </div>
                             </section>
 
                             {/* 02. 차량 제원 선택 */}
-                            <section className="itgo-card p-8 rounded-[40px]">
+                            <section className="content-card p-8 rounded-[40px]">
                                 <h2 className="section-title"><Icon name="Truck" className="w-4 h-4 text-blue-500" /> 02. 차량 및 제원 선택</h2>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
                                     {CATEGORIES.map(cat => (
@@ -418,7 +436,7 @@
                                             <div className={`mb-3 w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden bg-white shadow-sm border ${selectedCategory.id === cat.id ? 'border-blue-200' : 'border-slate-100'}`}>
                                                 <img src={cat.img} alt={cat.name} className="w-full h-full object-contain" onError={(e) => {
                                                     e.target.style.display = 'none';
-                                                    e.target.parentNode.innerHTML = `<span class="text-[10px] text-slate-400 font-bold">${cat.name}</span>`;
+                                                    e.target.parentNode.innerHTML = `<span class="text-[12px] text-slate-400 font-bold">${cat.name}</span>`;
                                                 }} />
                                             </div>
                                             <span className="font-bold text-[11px]">{cat.name}</span>
@@ -455,7 +473,7 @@
                                 </div>
                             </section>
 
-                            <section className="itgo-card p-8 rounded-[40px]">
+                            <section className="content-card p-8 rounded-[40px]">
                                 <h2 className="section-title"><Icon name="Package" className="w-4 h-4 text-blue-500" /> 03. 운송 화물 정보</h2>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
                                     {ITEM_CATEGORIES.map(cat => (
@@ -488,7 +506,7 @@
                                 </div>
                             </section>
 
-                            <section className="itgo-card p-8 rounded-[40px]">
+                            <section className="content-card p-8 rounded-[40px]">
                                 <div className="flex justify-between items-center mb-8">
                                     <h2 className="section-title mb-0"><Icon name="Plus" className="w-4 h-4 text-blue-500" /> 04. 추가 옵션 및 할증</h2>
                                     <button onClick={() => setIsPassenger(!isPassenger)} className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl font-bold text-xs transition-all ${isPassenger ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
@@ -538,14 +556,14 @@
                             </section>
                         </div>
 
-                        {/* 우측 견적 요약 영역 */}
+                        {/* 우측 견적 요약 영역 (한글화) */}
                         <div className="lg:col-span-4 lg:sticky lg:top-10">
                             <div className="bg-[#1E293B] rounded-[48px] p-10 text-white shadow-2xl border border-slate-800 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500 opacity-[0.05] rounded-full -mr-20 -mt-20 blur-3xl" />
                                 <div className="flex justify-between items-center mb-16 relative z-10">
-                                    <div className="flex items-center gap-3 opacity-30">
+                                    <div className="flex items-center gap-2 opacity-60">
                                         <Icon name="Link2" className="w-5 h-5 text-blue-400" />
-                                        <span className="text-[10px] font-black tracking-widest uppercase italic">itgo analytics</span>
+                                        <span className="text-[12px] font-black tracking-widest">견적 분석 요약</span>
                                     </div>
                                     <div className="flex gap-1.5">
                                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
@@ -554,42 +572,42 @@
                                 </div>
                                 <div className="space-y-10 mb-12 relative z-10">
                                     <div>
-                                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3 opacity-80">Route Distance</p>
+                                        <p className="text-[12px] font-black text-blue-400 tracking-widest mb-3 opacity-80">예상 이동 거리</p>
                                         <div className="flex items-baseline gap-2">
                                             {isDistanceLoading ? <div className="h-14 flex items-center"><div className="loading-spin" /></div> : <><span className="text-6xl font-black tracking-tighter">{distance}</span><span className="text-2xl font-bold opacity-20 italic">km</span></>}
                                         </div>
                                         {!isDistanceLoading && distance > 0 && (
-                                            <p className="text-[10px] text-blue-300/50 mt-1 font-bold">※ 계산 적용 거리: {Math.ceil(distance/5)*5}km (5km 단위 올림)</p>
+                                            <p className="text-[11px] text-blue-300/60 mt-2 font-bold">※ 계산 적용 거리: {Math.ceil(distance/5)*5}km (5km 단위 올림)</p>
                                         )}
                                     </div>
                                     <div className="space-y-5 p-7 bg-white/5 rounded-[36px] border border-white/5 backdrop-blur-sm">
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="opacity-30 font-bold uppercase">Vehicle</span>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="opacity-60 font-bold">차량 정보</span>
                                             <span className="font-black text-blue-400">{selectedCategory.name} {selectedCategory.id === 'truck' ? selectedTon.name.split(' ')[0] : ''}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="opacity-30 font-bold uppercase">Surcharge</span>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="opacity-60 font-bold">추가 요금 옵션</span>
                                             <div className="flex flex-wrap gap-2 justify-end">
-                                                {isRoundTrip && <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-md font-black text-[9px]">왕복</span>}
-                                                {waypointCount > 0 && <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-md font-black text-[9px]">경유{waypointCount}</span>}
-                                                {weatherType !== 'none' && <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md font-black text-[9px]">우천</span>}
-                                                {!isRoundTrip && waypointCount === 0 && weatherType === 'none' && <span className="opacity-50 text-[10px]">일반운임</span>}
+                                                {isRoundTrip && <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-md font-black text-[11px]">왕복</span>}
+                                                {waypointCount > 0 && <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-md font-black text-[11px]">경유{waypointCount}</span>}
+                                                {weatherType !== 'none' && <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md font-black text-[11px]">우천</span>}
+                                                {!isRoundTrip && waypointCount === 0 && weatherType === 'none' && <span className="opacity-50 text-[11px]">일반운임</span>}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="bg-gradient-to-br from-white/10 to-transparent rounded-[40px] p-10 backdrop-blur-xl border border-white/10 mb-10 relative overflow-hidden group">
                                     <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-[0.03] transition-opacity" />
-                                    <p className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-4 italic">Estimated Real Quote</p>
+                                    <p className="text-blue-300 text-[12px] font-black tracking-widest mb-4">최종 예상 견적 금액</p>
                                     <div className="flex items-baseline justify-between">
                                         <span className="text-5xl font-black tracking-tighter text-white">{formatPrice(calculation)}</span>
-                                        <span className="text-xl font-bold opacity-20 italic">KRW</span>
+                                        <span className="text-xl font-bold opacity-40">원</span>
                                     </div>
                                 </div>
                                 <button onClick={copyQuote} className="w-full py-6 bg-blue-600 text-white rounded-[28px] font-black text-lg hover:bg-blue-500 transition-all active:scale-95 shadow-2xl shadow-blue-900/40 relative z-10"> 견적 정보 복사하기 </button>
                                 <div className="mt-12 pt-8 border-t border-white/5 flex items-start gap-4 opacity-50 relative z-10">
                                     <Icon name="Info" className="w-5 h-5 text-slate-500 shrink-0" />
-                                    <p className="text-[10px] text-slate-500 leading-relaxed font-bold"> 본 요금은 실제 도로 거리를 5km 단위로 올림하여 단가표를 비례 계산한 결과입니다. 기상 상황이나 수작업 여부에 따라 최종가는 변동될 수 있습니다. </p>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed font-bold"> 본 요금은 실제 도로 거리를 5km 단위로 올림하여 단가표를 비례 계산한 결과입니다. 기상 상황이나 수작업 여부에 따라 최종가는 변동될 수 있습니다. </p>
                                 </div>
                             </div>
                         </div>
@@ -606,7 +624,7 @@
                                     <button onClick={() => setIsPostcodeVisible(false)} className="p-3 hover:bg-slate-50 rounded-full transition-colors text-slate-300"><Icon name="X" className="w-7 h-7"/></button>
                                 </div>
                                 <div ref={postcodeContainerRef} className="w-full flex-1 bg-white relative"></div>
-                                <div className="p-6 bg-slate-50/50 text-center text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] border-t border-slate-100"> itgo Smart Geolocation Engine </div>
+                                <div className="p-6 bg-slate-50/50 text-center text-[11px] text-slate-400 font-black uppercase tracking-[0.2em] border-t border-slate-100"> 스마트 위치 검색 엔진 </div>
                             </div>
                         </div>
                     )}
