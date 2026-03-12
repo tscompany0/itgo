@@ -96,7 +96,7 @@
         const PRICING_DATA = {
             motorcycle: [[5, 1.2], [10, 1.7], [20, 2.2], [30, 2.7], [50, 3.7]],
             damas: [[5, 2.5], [10, 3.0], [20, 3.5], [30, 4.0], [50, 5.0], [70, 6.0], [90, 8.0]],
-            labo: [[5, 2.8], [10, 3.3], [20, 3.8], [30, 4.5], [50, 5.5], [70, 6.5], [90, 8.5], [110, 9.5]],
+            labo: [[5, 3.0], [10, 3.5], [20, 4.0], [30, 5.0], [50, 6.0], [70, 7.0], [90, 9.0], [110, 10.0]],
             trucks: {
                 '1ton': [[15, 4], [30, 5], [50, 6], [70, 7], [90, 8], [110, 9], [130, 10], [150, 11], [170, 12], [200, 13], [220, 14], [250, 15], [300, 17], [350, 19], [400, 20], [450, 22], [500, 25], [550, 27], [600, 30]],
                 '1.4ton': [[15, 5], [30, 6], [50, 7], [70, 8], [90, 9], [110, 10], [130, 11], [150, 12], [170, 13], [200, 14], [220, 16], [250, 17], [300, 19], [350, 21], [400, 22], [450, 24], [500, 28], [550, 30], [600, 32]],
@@ -170,7 +170,7 @@
 
         const KAKAO_API_KEY = '1452d4f7d1995e5c8d57c8c7261cfee0';
 
-        // --- 요금 계산 핵심 알고리즘 ---
+        // --- 요금 계산 핵심 알고리즘 (선형 보간) ---
         const getInterpolatedPrice = (table, dist) => {
             if (!table || table.length === 0) return 0;
             if (dist <= table[0][0]) return table[0][1] * 10000;
@@ -293,7 +293,7 @@
                 if (distance === 0) return 0;
                 let total = 0;
 
-                // 🚀 거리 보정 로직 적용: 5km 단위로 무조건 올림 (예: 47.88 -> 50)
+                // 🚀 거리 보정 로직: 무조건 5km 단위로 올림 (예: 47.88 -> 50)
                 const distForCalc = Math.ceil(distance / 5) * 5;
 
                 // 1. 보정된 거리를 기반으로 단가표 대조하여 기본 운송료 산출
@@ -303,7 +303,7 @@
                     total = getInterpolatedPrice(PRICING_DATA[selectedCategory.id], distForCalc);
                 }
 
-                // 2. 부가 옵션 합산 (기본요금 + 할증)
+                // 2. 부가 옵션 합산 (기본요금 + 차량별 할증 적용)
                 total += selectedType.surcharge;
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
@@ -377,6 +377,7 @@
 
                     <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pb-24">
                         <div className="lg:col-span-8 space-y-8">
+                            {/* 01. 구간지 설정 */}
                             <section className="itgo-card p-8 rounded-[40px]">
                                 <h2 className="section-title"><Icon name="Navigation" className="w-4 h-4 text-blue-500" /> 01. 상/하차지 설정</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -401,12 +402,13 @@
                                 </div>
                             </section>
 
+                            {/* 02. 차량 제원 선택 */}
                             <section className="itgo-card p-8 rounded-[40px]">
                                 <h2 className="section-title"><Icon name="Truck" className="w-4 h-4 text-blue-500" /> 02. 차량 및 제원 선택</h2>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
                                     {CATEGORIES.map(cat => (
                                         <button key={cat.id} onClick={() => setSelectedCategory(cat)} className={`flex flex-col items-center p-4 rounded-[32px] border-2 transition-all ${selectedCategory.id === cat.id ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-transparent bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                                            {/* 🚀 차량별 아이콘 이미지 적용 */}
+                                            {/* 🚀 차량별 아이콘 이미지 적용 (bike, damas, labo, truck .jpg) */}
                                             <div className={`mb-3 w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden bg-white shadow-sm border ${selectedCategory.id === cat.id ? 'border-blue-200' : 'border-slate-100'}`}>
                                                 <img src={cat.img} alt={cat.name} className="w-full h-full object-contain" onError={(e) => {
                                                     e.target.style.display = 'none';
