@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>itgo - 잇고 통합 단가 매니저</title>
+    <title>itgo - 잇고 배차 시스템</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -13,16 +13,17 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
         
         body {
             font-family: 'Noto Sans KR', 'Inter', sans-serif;
-            background-color: #F8FAFC;
+            background-color: #F3F4F6;
             -webkit-font-smoothing: antialiased;
-            color: #1E293B;
+            color: #1F2937;
+            overflow: hidden; /* Prevent body scroll, handle in layout */
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
@@ -47,15 +48,18 @@
             100% { transform: rotate(360deg); }
         }
 
-        .itgo-card {
-            background: white;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        .input-field {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s;
         }
-
-        .ai-badge {
-            background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        .input-field:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 1px #3B82F6;
         }
     </style>
 </head>
@@ -71,140 +75,91 @@
                 Truck: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>,
                 MapPin: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
                 Package: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 16 21 7 12 2 3 7 3 16 12 21 21 16" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>,
-                RotateCcw: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><polyline points="3 3 3 8 8 8" /></svg>,
-                Navigation: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>,
                 Box: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /></svg>,
                 Search: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>,
                 X: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>,
                 ChevronDown: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>,
                 Bike: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="5.5" cy="17.5" r="3.5" /><circle cx="18.5" cy="17.5" r="3.5" /><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2" /></svg>,
-                Link2: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2" /><path d="M15 7h2a5 5 0 0 1 0 10h-2" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
-                Info: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>,
                 Check: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
-                CloudRain: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 13a4 4 0 0 0-8 0 4 4 0 0 0 0 8h8a4 4 0 0 0 0-8z"/><path d="M8 15v2"/><path d="M8 19v2"/><path d="M12 15v2"/><path d="M12 19v2"/><path d="M16 15v2"/><path d="M16 19v2"/></svg>,
-                CloudSnow: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 13a4 4 0 0 0-8 0 4 4 0 0 0 0 8h8a4 4 0 0 0 0-8z"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 15h.01"/><path d="M12 19h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/></svg>,
                 Plus: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
                 Minus: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-                AlertCircle: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-                Sparkles: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M3 5h4"/><path d="M21 17v4"/><path d="M19 19h4"/></svg>
+                User: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+                List: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+                Calendar: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             };
             return icons[name] || null;
         };
 
-        // --- 요율 데이터 ---
+        // --- 업계 평균 단가 데이터 (Fallback용) ---
         const CATEGORIES = [
-            { id: 'motorcycle', name: '오토바이 퀵', icon: <Icon name="Bike" className="w-6 h-6" />, base: 14000, kmRate: 1050 }, 
-            { id: 'damas', name: '다마스', icon: <Icon name="Box" className="w-6 h-6" />, base: 18000, kmRate: 1100 }, 
-            { id: 'labo', name: '라보', icon: <Icon name="Truck" className="w-6 h-6" />, base: 22000, kmRate: 1150 }, 
-            { id: 'truck', name: '트럭', icon: <Icon name="Truck" className="w-6 h-6" />, base: 35000, kmRate: 1500 }, 
+            { id: 'motorcycle', name: '오토바이 퀵', icon: <Icon name="Bike" className="w-8 h-8" />, base: 9000, kmRate: 700 },
+            { id: 'damas', name: '다마스', icon: <Icon name="Box" className="w-8 h-8" />, base: 25000, kmRate: 900 },
+            { id: 'labo', name: '라보', icon: <Icon name="Truck" className="w-8 h-8" />, base: 30000, kmRate: 1000 },
+            { id: 'truck', name: '트럭', icon: <Icon name="Truck" className="w-8 h-8" />, base: 45000, kmRate: 1200 },
         ];
 
         const TONS = [
-            { id: '1ton', name: '1t', multiplier: 1.0, base: 35000 },
-            { id: '1.4ton', name: '1.4t', multiplier: 1.15, base: 40000 },
-            { id: '2.5ton', name: '2.5t', multiplier: 1.6, base: 70000 },
-            { id: '3.5ton', name: '3.5t', multiplier: 1.9, base: 85000 },
-            { id: '5ton', name: '5t', multiplier: 2.8, base: 130000 },
-            { id: '8ton', name: '8t', multiplier: 3.5, base: 160000 },
-            { id: '11ton', name: '11t', multiplier: 4.5, base: 200000 },
-            { id: '14ton', name: '14t', multiplier: 5.2, base: 230000 },
-            { id: '15ton', name: '15t', multiplier: 5.5, base: 250000 },
-            { id: '18ton', name: '18t', multiplier: 6.5, base: 290000 },
-            { id: '25ton', name: '25t', multiplier: 7.5, base: 340000 },
+            { id: '1ton', name: '1t' }, { id: '1.4ton', name: '1.4t' }, { id: '2.5ton', name: '2.5t' }, 
+            { id: '3.5ton', name: '3.5t' }, { id: '5ton', name: '5t' }, { id: '8ton', name: '8t' }, 
+            { id: '11ton', name: '11t' }, { id: '14ton', name: '14t' }, { id: '15ton', name: '15t' }, 
+            { id: '18ton', name: '18t' }, { id: '25ton', name: '25t' },
         ];
 
         const VEHICLE_TYPES = [
-            { group: '기본 및 카고계열', types: [
-                { id: 'all', name: '전체', surcharge: 0 },
-                { id: 'cargo_wing', name: '카고/윙', surcharge: 10000 },
-                { id: 'cargo', name: '카고', surcharge: 0 },
-                { id: 'plus_cargo', name: '플러스카고', surcharge: 10000 },
-                { id: 'chuk_cargo', name: '축카고', surcharge: 20000 },
-                { id: 'plus_chuk_cargo', name: '플축카고', surcharge: 30000 },
-                { id: 'plus_ri', name: '플러스리', surcharge: 20000 },
-                { id: 'chuk_ri', name: '플축리', surcharge: 35000 },
-            ]},
-            { group: '윙바디 계열', types: [
-                { id: 'wing', name: '윙바디', surcharge: 20000 },
-                { id: 'plus_wing', name: '플러스윙', surcharge: 30000 },
-                { id: 'chuk_wing', name: '축윙', surcharge: 40000 },
-                { id: 'plus_chuk_wing', name: '플축윙', surcharge: 50000 },
-                { id: 'plus_wing_ri', name: '플러스윙리', surcharge: 40000 },
-                { id: 'plus_chuk_wing_ri', name: '플축윙리', surcharge: 60000 },
-                { id: 'plus_chuk_cargo_wing', name: '플축카고/윙', surcharge: 40000 },
-            ]},
-            { group: '탑 및 냉동/냉장 계열', types: [
-                { id: 'top', name: '탑', surcharge: 10000 },
-                { id: 'plus_top', name: '리프트탑', surcharge: 35000 },
-                { id: 'freezer_top', name: '냉동탑', surcharge: 40000 },
-                { id: 'fridge_top', name: '냉장탑', surcharge: 30000 },
-                { id: 'freezer_top_ri', name: '냉동탑리', surcharge: 60000 },
-                { id: 'fridge_top_ri', name: '냉장탑리', surcharge: 50000 },
-                { id: 'freezer_wing', name: '냉동윙', surcharge: 50000 },
-                { id: 'fridge_wing', name: '냉장윙', surcharge: 40000 },
-                { id: 'freezer_plus_chuk_wing', name: '냉동플축윙', surcharge: 70000 },
-                { id: 'fridge_plus_chuk_wing', name: '냉장플축윙', surcharge: 60000 },
-                { id: 'freezer_plus_chuk_ri', name: '냉동플축리', surcharge: 80000 },
-                { id: 'fridge_plus_chuk_ri', name: '냉장플축리', surcharge: 70000 },
-            ]},
-            { group: '특수 및 리프트 계열', types: [
-                { id: 'lift_cargo', name: '리프트카고', surcharge: 30000 },
-                { id: 'lift_wing', name: '리프트윙', surcharge: 45000 },
-                { id: 'horu', name: '호루', surcharge: 10000 },
-                { id: 'lift_horu', name: '리프트호루', surcharge: 30000 },
-                { id: 'jabara', name: '자바라', surcharge: 15000 },
-                { id: 'lift_jabara', name: '리프트자바라', surcharge: 35000 },
-                { id: 'peongka', name: '펑카', surcharge: 50000 },
-                { id: 'low_v', name: '로브이', surcharge: 50000 },
-                { id: 'trailer', name: '츄레라', surcharge: 100000 },
-                { id: 'lowbed', name: '로베드', surcharge: 120000 },
-                { id: 'ladder', name: '사다리', surcharge: 60000 },
-                { id: 'extra_long', name: '초장축', surcharge: 20000 },
-                { id: 'wide', name: '광폭', surcharge: 30000 },
-                { id: 'plus_chuk_cargo_wing', name: '플축카고/윙', surcharge: 40000 },
-            ]}
-        ];
-
-        const ITEM_CATEGORIES = [
-            { id: 'manual', name: '고객수작업', icon: '🤲', sizes: [] },
-            { id: 'pallet', name: '파레트', icon: '📦', sizes: ['1100*1100', '1200*1000', 'KPP규격', '기타'] },
-            { id: 'box', name: '박스', icon: '📥', sizes: ['소형', '중형', '대형', '특대형'] },
-            { id: 'furniture', name: '가구/가전', icon: '🛋️', sizes: ['1인용', '가족형', '대형가전'] },
-            { id: 'other', name: '기타 화물', icon: '📝', sizes: ['직접입력'] },
+            { id: 'cargo', name: '카고 (기본)', surcharge: 0 },
+            { id: 'wing', name: '윙바디', surcharge: 20000 },
+            { id: 'top', name: '탑차', surcharge: 10000 },
+            { id: 'lift_cargo', name: '리프트', surcharge: 30000 },
+            { id: 'freezer_top', name: '냉동', surcharge: 40000 }
         ];
 
         const METHOD_OPTIONS = [
             { id: 'basic', name: '기본 운송', desc: '차량이 건물 앞에서 건물 앞까지 운송합니다.', price: 0 },
             { id: 'forklift', name: '상하차(지게차)', desc: '파레트로 작업된 제품을 지게차로 상하차 합니다.', price: 0 },
             { id: 'helper_a', name: '기사님 도움 A', desc: '일반화물 또는 소형가전(3개미만) 을 고객님과 함께 운반합니다.', price: 20000 },
-            { id: 'helper_b', name: '기사님 도움 B', desc: '기사님 도움 A + 간단이사 - 1층 또는 엘리베이터 기준 (계단-상담)', price: 50000 },
+            { id: 'helper_b', name: '기사님 도움 B', desc: '기사님 도움 A + 간단이사 - 1층 또는 엘리베이터 기준', price: 50000 },
         ];
 
+        // API 키 설정 (카카오 & 인성데이타)
         const KAKAO_API_KEY = '1452d4f7d1995e5c8d57c8c7261cfee0';
+        const INSUNG_API_URL = 'https://quick.api.insungdata.com/api/cost_distance/'; 
+        const INSUNG_M_CODE = '7597';            
+        const INSUNG_CC_CODE = '13016';          
+        const INSUNG_TOKEN = 'ad3f4419d04864bb2ae27c03b1d27c3e'; 
+        const INSUNG_USER_ID = '티에스컴퍼니';   // 실사용시 반드시 교체
 
         function App() {
-            const [startPoint, setStartPoint] = useState({ address: '', x: null, y: null });
-            const [endPoint, setEndPoint] = useState({ address: '', x: null, y: null });
+            // 상세 주소 및 연락처 폼 상태
+            const [startInfo, setStartInfo] = useState({ address: '', detail: '', name: '', dept: '', manager: '', phone: '', x: null, y: null });
+            const [endInfo, setEndPoint] = useState({ address: '', detail: '', name: '', dept: '', manager: '', phone: '', x: null, y: null });
             const [distance, setDistance] = useState(0); 
 
-            const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[3]);
+            // 차량 및 옵션 상태
+            const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
             const [selectedTon, setSelectedTon] = useState(TONS[0]);
-            const [selectedType, setSelectedType] = useState(VEHICLE_TYPES[0].types[0]);
-            
+            const [selectedType, setSelectedType] = useState(VEHICLE_TYPES[0]);
             const [selectedMethod, setSelectedMethod] = useState(METHOD_OPTIONS[0]);
             const [isPassenger, setIsPassenger] = useState(false);
-            const [isRoundTrip, setIsRoundTrip] = useState(false);
-            const [waypointCount, setWaypointCount] = useState(0);
-            const [weatherType, setWeatherType] = useState('none'); 
+            
+            // 일정 상태
+            const [loadDateType, setLoadDateType] = useState('now'); // now, custom
+            const [unloadDateType, setUnloadDateType] = useState('today'); // today, custom
 
-            const [selectedItemCat, setSelectedItemCat] = useState(ITEM_CATEGORIES[0]);
-            const [itemQty, setItemQty] = useState(1);
-            const [itemSize, setItemSize] = useState('');
-            const [itemWeight, setItemWeight] = useState(0.1);
+            // 추가 요금 및 결제 정보
+            const [extraCost, setExtraCost] = useState(0);
+            const [paymentMethod, setPaymentMethod] = useState('prepaid'); // prepaid, postpaid, card
+            const [customerInfoType, setCustomerInfoType] = useState('sameAsStart'); // sameAsStart, sameAsEnd, custom
+            const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '' });
 
+            // API 연동 상태
+            const [insungCosts, setInsungCosts] = useState(null); 
+            const [isFetchingQuote, setIsFetchingQuote] = useState(false);
+
+            // 다음 우편번호 모달
             const [isPostcodeVisible, setIsPostcodeVisible] = useState(false);
             const [postcodeTarget, setPostcodeTarget] = useState('start');
             const postcodeContainerRef = useRef(null);
+            const [toastMessage, setToastMessage] = useState('');
 
             useEffect(() => {
                 const script = document.createElement('script');
@@ -237,9 +192,11 @@
                             const addr = data.address;
                             setIsPostcodeVisible(false);
                             const coords = await fetchCoords(addr);
-                            const info = { address: addr, x: coords?.x, y: coords?.y };
-                            if (postcodeTarget === 'start') setStartPoint(info);
-                            else setEndPoint(info);
+                            if (postcodeTarget === 'start') {
+                                setStartInfo(prev => ({ ...prev, address: addr, x: coords?.x, y: coords?.y }));
+                            } else {
+                                setEndPoint(prev => ({ ...prev, address: addr, x: coords?.x, y: coords?.y }));
+                            }
                         },
                         width: '100%',
                         height: '100%'
@@ -248,454 +205,466 @@
             }, [isPostcodeVisible, postcodeTarget]);
 
             useEffect(() => {
-                if (selectedCategory.id === 'motorcycle') {
-                    if (['forklift', 'helper_a', 'helper_b'].includes(selectedMethod.id)) {
-                        setSelectedMethod(METHOD_OPTIONS[0]);
-                    }
-                    setIsPassenger(false);
-                }
-            }, [selectedCategory]);
-
-            useEffect(() => {
-                if (startPoint.x && endPoint.x) {
-                    const R = 6371; 
-                    const dLat = (endPoint.y - startPoint.y) * (Math.PI / 180);
-                    const dLon = (endPoint.x - startPoint.x) * (Math.PI / 180);
-                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                              Math.cos(startPoint.y * (Math.PI/180)) * Math.cos(endPoint.y * (Math.PI/180)) *
-                              Math.sin(dLon/2) * Math.sin(dLon/2);
+                if (startInfo.x && endInfo.x) {
+                    const R = 6371;
+                    const dLat = (endInfo.y - startInfo.y) * (Math.PI / 180);
+                    const dLon = (endInfo.x - startInfo.x) * (Math.PI / 180);
+                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(startInfo.y * (Math.PI/180)) * Math.cos(endInfo.y * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
                     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                    setDistance(Math.max(1, Math.round(R * c))); 
+                    setDistance(Math.max(1, Math.round(R * c * 1.3))); 
                 }
-            }, [startPoint, endPoint]);
+            }, [startInfo, endInfo]);
 
-            const tollFee = useMemo(() => {
-                if (!startPoint.address || !endPoint.address) return 0;
-                const islandKeywords = ["인천공항", "운서동", "영종도", "용유도", "운남동", "운북동", "중산동", "남북동", "덕교동", "을왕동", "무의동"];
-                const isCrossingBridge = islandKeywords.some(kw => startPoint.address.includes(kw) || endPoint.address.includes(kw));
-                return isCrossingBridge ? 12000 : 0;
-            }, [startPoint.address, endPoint.address]);
+            // 인성데이타 API 호출 로직
+            useEffect(() => {
+                const fetchInsungQuote = async () => {
+                    if (distance > 0) {
+                        setIsFetchingQuote(true);
+                        try {
+                            if (INSUNG_USER_ID === 'YOUR_USER_ID' || !INSUNG_USER_ID) {
+                                throw new Error("API ID 미입력");
+                            }
+                            const url = `${INSUNG_API_URL}?type=json&m_code=${INSUNG_M_CODE}&cc_code=${INSUNG_CC_CODE}&token=${INSUNG_TOKEN}&user_id=${INSUNG_USER_ID}&distance=${distance}`;
+                            const response = await fetch(url);
+                            const data = await response.json();
+                            
+                            let costData = Array.isArray(data) ? (data.find(item => item.basic_cost !== undefined) || data[1] || data[0]) : data;
+                            
+                            if (costData && costData.basic_cost !== undefined) setInsungCosts(costData);
+                            else throw new Error("요금 정보 없음");
+                        } catch (error) {
+                            // Fallback mock data if API fails or not configured
+                            setInsungCosts({
+                                basic_cost: distance * 700 + 9000,
+                                damas_cost: distance * 900 + 25000,
+                                labo_cost: distance * 1000 + 30000,
+                                truck_cost: distance * 1200 + 45000,
+                                cargo_1_4_cost: distance * 1300 + 55000,
+                                cargo_2_5_cost: distance * 1500 + 80000,
+                                cargo_3_5_cost: distance * 1800 + 100000,
+                                cargo_5_cost: distance * 2200 + 150000,
+                                cargo_11_cost: distance * 3200 + 220000,
+                                cargo_25_cost: distance * 4500 + 350000
+                            });
+                        } finally {
+                            setIsFetchingQuote(false);
+                        }
+                    }
+                };
+                fetchInsungQuote();
+            }, [distance]);
 
             const calculation = useMemo(() => {
-                let baseFare = selectedCategory.base;
-                let multiplier = 1.0;
-                if (selectedCategory.id === 'truck') {
-                    baseFare = selectedTon.base;
-                    multiplier = selectedTon.multiplier;
+                let apiBaseCost = 0;
+                if (insungCosts) {
+                    if (selectedCategory.id === 'motorcycle') apiBaseCost = Number(insungCosts.basic_cost);
+                    else if (selectedCategory.id === 'damas') apiBaseCost = Number(insungCosts.damas_cost);
+                    else if (selectedCategory.id === 'labo') apiBaseCost = Number(insungCosts.labo_cost);
+                    else if (selectedCategory.id === 'truck') {
+                        switch(selectedTon.id) {
+                            case '1ton': apiBaseCost = Number(insungCosts.truck_cost); break;
+                            case '1.4ton': apiBaseCost = Number(insungCosts.cargo_1_4_cost); break;
+                            case '2.5ton': apiBaseCost = Number(insungCosts.cargo_2_5_cost); break;
+                            case '3.5ton': apiBaseCost = Number(insungCosts.cargo_3_5_cost); break;
+                            case '5ton': apiBaseCost = Number(insungCosts.cargo_5_cost); break;
+                            case '11ton': apiBaseCost = Number(insungCosts.cargo_11_cost); break;
+                            case '25ton': apiBaseCost = Number(insungCosts.cargo_25_cost); break;
+                            default: apiBaseCost = Number(insungCosts.truck_cost); break;
+                        }
+                    }
                 }
-                const kmRate = selectedCategory.kmRate;
-                let distFare = Math.max(0, distance - 10) * kmRate * (selectedCategory.id === 'truck' ? (selectedTon.multiplier * 0.8) : 1);
-                let total = baseFare + distFare;
+                
+                let total = apiBaseCost || 0;
                 total += selectedType.surcharge;
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
-                if (waypointCount > 0) total += (waypointCount * 10000);
-                if (isRoundTrip) total *= 1.5;
-                if (weatherType !== 'none') total *= 1.2;
-                total += tollFee;
 
-                let finalTotal;
-                if (selectedCategory.id === 'motorcycle') {
-                    finalTotal = Math.floor(total / 1000) * 1000;
-                } else {
-                    finalTotal = Math.floor(total / 5000) * 5000;
-                }
-                return finalTotal;
-            }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, weatherType, tollFee]);
+                return Math.floor(total / 100) * 100;
+            }, [insungCosts, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger]);
 
-            const formatPrice = (p) => new Intl.NumberFormat('ko-KR').format(p);
+            const finalTotal = calculation + Number(extraCost);
+            const formatPrice = (p) => new Intl.NumberFormat('ko-KR').format(p || 0);
 
-            // --- 고객 전송용 예쁜 텍스트 생성 로직 ---
-            const handleCopyQuote = () => {
-                const startAddr = startPoint.address || '(미입력)';
-                const endAddr = endPoint.address || '(미입력)';
-                const vehicle = `${selectedCategory.name}${selectedCategory.id === 'truck' ? ` (${selectedTon.name})` : ''}`;
-                const specs = selectedType.name;
-                const options = [];
-                if (selectedMethod.price > 0) options.push(`${selectedMethod.name} (+${formatPrice(selectedMethod.price)}원)`);
-                if (isPassenger) options.push('동승 1인 (+10,000원)');
-                if (waypointCount > 0) options.push(`경유지 ${waypointCount}곳 (+${formatPrice(waypointCount * 10000)}원)`);
-                if (isRoundTrip) options.push('왕복 운행 (1.5배 적용)');
-                if (weatherType === 'rain') options.push('우천 할증 (20% 적용)');
-                if (weatherType === 'snow') options.push('강설 할증 (20% 적용)');
-                if (tollFee > 0) options.push('인천대교 톨게이트 비용 포함');
-
-                const optionTxt = options.length > 0 ? options.map(opt => `- ${opt}`).join('\n') : '- 없음';
-                const itemDetail = selectedItemCat.id !== 'manual' ? `${selectedItemCat.name} (${itemQty}개 / ${itemSize})` : selectedItemCat.name;
-
-                const copyMessage = `[itgo] 잇고 운송 견적 안내
-
-📍 구간 정보
-- 상차: ${startAddr}
-- 하차: ${endAddr}
-- 거리: ${distance}km (직선거리)
-
-🚛 차량 정보
-- 종류: ${vehicle}
-- 상세: ${specs}
-
-📦 화물 정보
-- 품목: ${itemDetail}
-
-✨ 선택 옵션
-${optionTxt}
-
-💰 최종 운임
-- ${formatPrice(calculation)}원 (VAT포함)
-
-* 위 견적은 실시간 수급 상황 및 도로 상황에 따라 변동될 수 있습니다.
-잇고(itgo)를 이용해 주셔서 감사합니다.`;
-
-                // 시스템 지침에 따른 iFrame 대응 복사 로직
-                const textArea = document.createElement("textarea");
-                textArea.value = copyMessage;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    alert('견적 정보가 예쁘게 복사되었습니다!\n고객님께 바로 붙여넣기 하세요.');
-                } catch (err) {
-                    alert('복사에 실패했습니다. 다시 시도해 주세요.');
-                }
-                document.body.removeChild(textArea);
+            const showToast = (message) => {
+                setToastMessage(message);
+                setTimeout(() => setToastMessage(''), 3000);
             };
 
+            // 좌측 사이드바 메뉴 컴포넌트
+            const SidebarItem = ({ icon, label, active }) => (
+                <div className={`w-full flex flex-col items-center justify-center py-4 cursor-pointer transition-colors ${active ? 'bg-blue-600 text-white border-l-4 border-white' : 'text-slate-400 hover:text-white hover:bg-slate-700 border-l-4 border-transparent'}`}>
+                    <Icon name={icon} className="w-6 h-6 mb-1" />
+                    <span className="text-[11px] font-bold">{label}</span>
+                </div>
+            );
+
             return (
-                <div className="min-h-screen p-4 md:p-8">
-                    <header className="max-w-7xl mx-auto mb-8 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-[#1E293B] p-4 rounded-[20px] text-white shadow-lg flex items-center justify-center">
-                                <Icon name="Link2" className="w-7 h-7 text-blue-400 mr-1" />
-                                <span className="text-2xl font-black tracking-tighter italic">itgo</span>
-                            </div>
-                            <div className="hidden sm:block">
-                                <h1 className="text-lg font-bold text-slate-800 leading-tight italic">잇고 통합 단가 매니저</h1>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-0.5">National Freight Connector</p>
-                            </div>
+                <div className="flex h-screen w-full bg-[#f4f6f8]">
+                    {/* 토스트 메시지 */}
+                    {toastMessage && (
+                        <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-md shadow-lg z-[9999] text-sm font-bold animate-in fade-in slide-in-from-top-5">
+                            {toastMessage}
                         </div>
-                        <button onClick={() => window.location.reload()} className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-blue-600 transition-all text-xs font-black shadow-sm">
-                            <Icon name="RotateCcw" className="w-4 h-4" /> 새로고침
-                        </button>
-                    </header>
+                    )}
 
-                    <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-20">
-                        <div className="lg:col-span-8 space-y-6">
-                            <section className="itgo-card p-7 rounded-[32px]">
-                                <h2 className="text-[11px] font-black text-slate-400 mb-6 uppercase tracking-widest flex items-center gap-2">
-                                    <Icon name="Navigation" className="w-3.5 h-3.5 text-blue-500" /> 01. 운송 구간지 설정 (직선거리 산출)
-                                </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div onClick={() => openPostcode('start')} className="group cursor-pointer">
-                                        <p className="text-[11px] font-bold text-slate-400 mb-2.5 ml-1">상차지 (출발)</p>
-                                        <div className="p-4 bg-slate-50/50 border-2 border-slate-100 rounded-3xl group-hover:border-blue-400 group-hover:bg-white transition-all flex items-center gap-4">
-                                            <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-50"><Icon name="MapPin" className="w-5 h-5 text-blue-500" /></div>
-                                            <span className={`text-sm font-bold truncate flex-1 ${startPoint.address ? 'text-slate-900' : 'text-slate-300'}`}>
-                                                {startPoint.address || '주소를 입력해주세요 *'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div onClick={() => openPostcode('end')} className="group cursor-pointer">
-                                        <p className="text-[11px] font-bold text-slate-400 mb-2.5 ml-1">하차지 (도착)</p>
-                                        <div className="p-4 bg-slate-50/50 border-2 border-slate-100 rounded-3xl group-hover:border-orange-400 group-hover:bg-white transition-all flex items-center gap-4">
-                                            <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-50"><Icon name="MapPin" className="w-5 h-5 text-orange-500" /></div>
-                                            <span className={`text-sm font-bold truncate flex-1 ${endPoint.address ? 'text-slate-900' : 'text-slate-300'}`}>
-                                                {endPoint.address || '주소를 입력해주세요 *'}
-                                            </span>
-                                        </div>
-                                    </div>
+                    {/* Left Sidebar (Dark Blue/Black) */}
+                    <aside className="w-[100px] bg-[#1a2233] flex flex-col justify-between h-full flex-shrink-0 relative z-20">
+                        <div>
+                            {/* Logo */}
+                            <div className="h-20 flex items-center justify-center border-b border-slate-700/50 mb-4">
+                                <div className="flex items-center gap-1">
+                                    <Icon name="Box" className="w-5 h-5 text-blue-400" />
+                                    <span className="text-white font-black italic tracking-tighter text-lg">itgo</span>
                                 </div>
-                            </section>
-
-                            <section className="itgo-card p-7 rounded-[32px]">
-                                <h2 className="text-[11px] font-black text-slate-400 mb-6 uppercase tracking-widest flex items-center gap-2">
-                                    <Icon name="Truck" className="w-3.5 h-3.5 text-blue-500" /> 02. 차량 및 톤수 선택
-                                </h2>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                                    {CATEGORIES.map(cat => (
-                                        <button key={cat.id} onClick={() => setSelectedCategory(cat)} className={`flex flex-col items-center p-5 rounded-3xl border-2 transition-all ${selectedCategory.id === cat.id ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-slate-50 bg-slate-50/50 text-slate-400 hover:border-slate-200'}`}>
-                                            <div className={`mb-2.5 p-2 rounded-xl ${selectedCategory.id === cat.id ? 'bg-blue-600 text-white' : 'bg-white'}`}>{cat.icon}</div>
-                                            <span className="font-bold text-xs">{cat.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-wider">톤수 선택</label>
-                                        <div className="relative">
-                                            <select 
-                                                disabled={selectedCategory.id !== 'truck'}
-                                                value={selectedTon.id} 
-                                                onChange={(e) => setSelectedTon(TONS.find(t => t.id === e.target.value))} 
-                                                className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl font-bold text-sm appearance-none outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-pointer disabled:opacity-40"
-                                            >
-                                                {TONS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                            </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                <Icon name="ChevronDown" className="w-4 h-4 text-slate-300" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-wider">세부 제원</label>
-                                        <div className="relative">
-                                            <select 
-                                                value={selectedType.id} 
-                                                onChange={(e) => {
-                                                    const allTypes = VEHICLE_TYPES.flatMap(g => g.types);
-                                                    setSelectedType(allTypes.find(v => v.id === e.target.value));
-                                                }} 
-                                                className="w-full p-3.5 bg-white border border-slate-200 rounded-2xl font-bold text-sm appearance-none outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-pointer"
-                                            >
-                                                {VEHICLE_TYPES.map(group => (
-                                                    <optgroup key={group.group} label={group.group}>
-                                                        {group.types.map(v => (
-                                                            <option key={v.id} value={v.id}>{v.name}</option>
-                                                        ))}
-                                                    </optgroup>
-                                                ))}
-                                            </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                <Icon name="ChevronDown" className="w-4 h-4 text-slate-300" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section className="itgo-card p-7 rounded-[32px]">
-                                <h2 className="text-[11px] font-black text-slate-400 mb-6 uppercase tracking-widest flex items-center gap-2">
-                                    <Icon name="Package" className="w-3.5 h-3.5 text-blue-500" /> 03. 화물 물품 정보
-                                </h2>
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
-                                    {ITEM_CATEGORIES.map(cat => (
-                                        <button 
-                                            key={cat.id} 
-                                            onClick={() => {
-                                                setSelectedItemCat(cat);
-                                                setItemSize(cat.sizes?.[0] || '');
-                                            }} 
-                                            className={`flex flex-col items-center py-5 rounded-[22px] border-2 transition-all ${selectedItemCat.id === cat.id ? 'border-slate-800 bg-slate-800 text-white shadow-sm' : 'border-slate-50 bg-slate-50/50 text-slate-400'}`}>
-                                            <span className="text-2xl mb-1">{cat.icon}</span>
-                                            <span className="font-bold text-[11px]">{cat.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {selectedItemCat.id !== 'manual' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/50 p-6 rounded-3xl border border-slate-100 animate-in fade-in slide-in-from-top-2">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-500 ml-1">개수입력</label>
-                                            <div className="flex items-center bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                                                <input type="number" value={itemQty} onChange={(e) => setItemQty(parseInt(e.target.value) || 1)} className="w-full px-4 py-3 text-center font-bold text-sm outline-none bg-transparent" />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-500 ml-1">규격선택</label>
-                                            <select value={itemSize} onChange={(e) => setItemSize(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none shadow-sm cursor-pointer">
-                                                {selectedItemCat.sizes.map(s => <option key={s} value={s}>{s}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-500 ml-1">중량(t)입력</label>
-                                            <div className="relative">
-                                                <input type="number" step="0.1" value={itemWeight} onChange={(e) => setItemWeight(parseFloat(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none shadow-sm" />
-                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300">ton</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </section>
-
-                            <section className="itgo-card p-7 rounded-[32px]">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                        상하차 방법 및 옵션 <span className="text-red-500 lowercase tracking-normal font-bold">* 추가 요금 발생</span>
-                                    </h2>
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[11px] font-bold text-slate-500">동승 1인</span>
-                                            <button 
-                                                disabled={selectedCategory.id === 'motorcycle'}
-                                                onClick={() => setIsPassenger(!isPassenger)}
-                                                className={`w-10 h-6 rounded-full transition-all relative ${isPassenger ? 'bg-blue-600' : 'bg-slate-200'} ${selectedCategory.id === 'motorcycle' ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                            >
-                                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all ${isPassenger ? 'translate-x-4' : ''}`} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                                    {METHOD_OPTIONS.map(opt => {
-                                        const isRestricted = selectedCategory.id === 'motorcycle' && ['forklift', 'helper_a', 'helper_b'].includes(opt.id);
-                                        return (
-                                            <button 
-                                                key={opt.id} 
-                                                disabled={isRestricted}
-                                                onClick={() => setSelectedMethod(opt)}
-                                                className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all 
-                                                    ${selectedMethod.id === opt.id ? 'border-blue-600 bg-blue-50/30 shadow-sm' : 'border-slate-50 bg-slate-50/50'}
-                                                    ${isRestricted ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
-                                            >
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedMethod.id === opt.id ? 'border-blue-600 bg-blue-500 text-white' : 'border-slate-300 bg-white'}`}>
-                                                        {selectedMethod.id === opt.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-                                                    </div>
-                                                    <span className={`text-xs font-bold ${selectedMethod.id === opt.id ? 'text-blue-700' : 'text-slate-600'}`}>
-                                                        {opt.name}
-                                                    </span>
-                                                </div>
-                                                <p className="text-[10px] text-slate-400 leading-tight font-medium min-h-[3rem]">{opt.desc}</p>
-                                                {isRestricted && (
-                                                    <div className="mt-2 flex items-center gap-1 text-[9px] text-orange-500 font-bold">
-                                                        <Icon name="AlertCircle" className="w-2.5 h-2.5" /> 오토바이 선택불가
-                                                    </div>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <input type="checkbox" checked={isRoundTrip} onChange={() => setIsRoundTrip(!isRoundTrip)} className="w-4 h-4 accent-blue-600 cursor-pointer" id="roundTrip" />
-                                            <label htmlFor="roundTrip" className="text-xs font-bold text-slate-700 cursor-pointer">왕복 운행 (1.5배)</label>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                                        <span className="text-xs font-bold text-slate-700">경유지 추가 (+1만)</span>
-                                        <div className="flex items-center gap-3">
-                                            <button onClick={() => setWaypointCount(Math.max(0, waypointCount - 1))} className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
-                                                <Icon name="Minus" className="w-3.5 h-3.5" />
-                                            </button>
-                                            <span className="text-xs font-black text-blue-600">{waypointCount}곳</span>
-                                            <button onClick={() => setWaypointCount(waypointCount + 1)} className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
-                                                <Icon name="Plus" className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-2 bg-slate-50/50 rounded-2xl border border-slate-100 flex items-center gap-1">
-                                        <button 
-                                            onClick={() => setWeatherType(weatherType === 'rain' ? 'none' : 'rain')}
-                                            className={`flex-1 py-2 px-1 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 transition-all ${weatherType === 'rain' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-400'}`}
-                                        >
-                                            <Icon name="CloudRain" className="w-3 h-3" /> 우천시 (+20%)
-                                        </button>
-                                        <button 
-                                            onClick={() => setWeatherType(weatherType === 'snow' ? 'none' : 'snow')}
-                                            className={`flex-1 py-2 px-1 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 transition-all ${weatherType === 'snow' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-400'}`}
-                                        >
-                                            <Icon name="CloudSnow" className="w-3 h-3" /> 눈올시 (+20%)
-                                        </button>
-                                    </div>
-                                </div>
-                            </section>
+                            </div>
+                            
+                            {/* Menus */}
+                            <SidebarItem icon="Truck" label="화물등록" active={true} />
+                            <SidebarItem icon="List" label="배차내역" active={false} />
+                            <SidebarItem icon="User" label="거래처" active={false} />
                         </div>
 
-                        <div className="lg:col-span-4 lg:sticky lg:top-8">
-                            <div className="bg-[#1E293B] rounded-[40px] p-8 text-white shadow-2xl shadow-blue-900/10 border border-slate-800">
-                                <div className="flex justify-between items-center mb-12">
-                                    <div className="flex items-center gap-2 opacity-40">
-                                        <Icon name="Link2" className="w-4 h-4" />
-                                        <span className="text-[10px] font-black tracking-widest uppercase">itgo Internal</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 rounded-full border border-blue-500/30">
-                                        <Icon name="Sparkles" className="w-3 h-3 text-blue-400" />
-                                        <span className="text-[9px] font-black text-blue-400 uppercase tracking-tighter">AI 지능형 추천가</span>
-                                    </div>
+                        {/* Bottom Info */}
+                        <div className="p-3 mb-4 flex flex-col gap-2 items-center">
+                            <div className="text-[10px] text-slate-400 font-bold bg-slate-800 rounded-full px-3 py-1">Homepage</div>
+                            <div className="text-[10px] text-slate-400 font-bold bg-slate-800 rounded-full px-3 py-1">Tel</div>
+                            <div className="text-white font-bold text-xs">1522-7123</div>
+                            <div className="text-[10px] text-slate-500 mt-2 text-center">24시간 운영</div>
+                        </div>
+                    </aside>
+
+                    {/* Main Content Area (Scrollable) */}
+                    <main className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-8">
+                        <div className="max-w-[1000px] mx-auto pb-20">
+                            
+                            {/* Top Header */}
+                            <div className="flex justify-between items-center mb-8">
+                                <div className="flex items-center gap-2 text-slate-500">
+                                    <Icon name="User" className="w-6 h-6" />
+                                    <span className="font-medium text-sm">로그인해주세요.</span>
                                 </div>
-
-                                <div className="space-y-8 mb-10">
-                                    <div>
-                                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5 opacity-80">Estimated Distance</p>
-                                        <div className="flex items-baseline gap-1.5">
-                                            <span className="text-5xl font-black tracking-tighter">{distance}</span>
-                                            <span className="text-xl font-bold opacity-30 italic">km</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4 p-5 bg-white/5 rounded-[28px] border border-white/5">
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="opacity-40 font-bold uppercase tracking-tighter">선택 차량</span>
-                                            <span className="font-bold text-blue-400">{selectedCategory.name} {selectedCategory.id === 'truck' ? selectedTon.name : ''}</span>
-                                        </div>
-                                        <div className="flex justify-between items-start text-xs">
-                                            <span className="opacity-40 mt-0.5 font-bold uppercase tracking-tighter">운송 옵션</span>
-                                            <div className="text-right">
-                                                <p className="font-bold text-slate-300">
-                                                    {selectedMethod.name}
-                                                    {selectedMethod.price > 0 && <span className="text-blue-400 ml-1.5">+{formatPrice(selectedMethod.price)}원</span>}
-                                                </p>
-                                                {isPassenger && <p className="text-[10px] text-blue-400 font-bold mt-1">+ 동승 1인 (+10,000원)</p>}
-                                            </div>
-                                        </div>
-                                        { (waypointCount > 0 || isRoundTrip || weatherType !== 'none' || tollFee > 0) && (
-                                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-1">
-                                                {isRoundTrip && <span className="text-[9px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-bold">왕복 할증 (1.5x)</span>}
-                                                {waypointCount > 0 && <span className="text-[9px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-bold">경유 {waypointCount}곳</span>}
-                                                {weatherType === 'rain' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">우천할증 (20%)</span>}
-                                                {weatherType === 'snow' && <span className="text-[9px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full font-bold">강설할증 (20%)</span>}
-                                                {tollFee > 0 && <span className="text-[9px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full font-bold">인천대교 톨비 포함</span>}
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between items-center text-[10px] pt-4 border-t border-white/5">
-                                            <span className="opacity-40 uppercase tracking-tighter font-bold">Cargo Summary</span>
-                                            <span className="font-bold text-slate-400">
-                                                {selectedItemCat.name} {selectedItemCat.id !== 'manual' && `| ${itemQty}개`}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white/10 rounded-[32px] p-8 backdrop-blur-xl border border-white/10 mb-8 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-12 -mt-12" />
-                                    <p className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-3">Total Estimated Price (AI)</p>
-                                    <div className="flex items-baseline justify-between">
-                                        <span className="text-4xl font-black tracking-tighter text-white">{formatPrice(calculation)}</span>
-                                        <span className="text-lg font-bold opacity-30 italic">KRW</span>
-                                    </div>
-                                </div>
-
-                                <button 
-                                    onClick={handleCopyQuote} 
-                                    className="w-full py-5 bg-blue-600 text-white rounded-[26px] font-black text-base hover:bg-blue-500 transition-all active:scale-95 shadow-xl shadow-blue-900/20"
-                                >
-                                    견적 내역 복사하기
+                                <button className="text-sm font-bold text-slate-600 hover:text-slate-900 px-4 py-2 border border-slate-300 rounded-md bg-white">
+                                    로그인
                                 </button>
+                            </div>
 
-                                <div className="mt-10 pt-6 border-t border-white/5 flex items-start gap-3">
-                                    <Icon name="Info" className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                                    <p className="text-[10px] text-slate-500 leading-relaxed font-bold">
-                                        본 요금은 영종도/용유도 전역의 인천대교 통행료 및 타사 단가 데이터를 반영한 최적화 가이드입니다. 복사 버튼을 눌러 고객님께 바로 전달하세요.
-                                    </p>
+                            {/* Section 1: 출/도착지 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 relative">
+                                {/* 교환 아이콘 중앙 배치 (데스크탑) */}
+                                <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white border border-slate-200 rounded-full items-center justify-center text-blue-500">
+                                    ⇄
+                                </div>
+
+                                {/* 출발지 */}
+                                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                                    <h3 className="font-bold text-lg mb-1">출발지</h3>
+                                    <p className="text-xs text-red-500 mb-4">필수 입력칸을 모두 작성해주세요.</p>
+                                    <div className="space-y-3">
+                                        <div className="relative">
+                                            <input type="text" readOnly placeholder="주소를 입력해주세요. *" value={startInfo.address} onClick={() => openPostcode('start')} className="input-field bg-slate-50 cursor-pointer text-blue-600 font-bold" />
+                                        </div>
+                                        <input type="text" placeholder="상세주소를 입력해주세요." value={startInfo.detail} onChange={e => setStartInfo({...startInfo, detail: e.target.value})} className="input-field" />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input type="text" placeholder="상호/이름 *" value={startInfo.name} onChange={e => setStartInfo({...startInfo, name: e.target.value})} className="input-field" />
+                                            <input type="text" placeholder="부서명" value={startInfo.dept} onChange={e => setStartInfo({...startInfo, dept: e.target.value})} className="input-field" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input type="text" placeholder="담당자명" value={startInfo.manager} onChange={e => setStartInfo({...startInfo, manager: e.target.value})} className="input-field" />
+                                            <input type="text" placeholder="연락처 *" value={startInfo.phone} onChange={e => setStartInfo({...startInfo, phone: e.target.value})} className="input-field" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 도착지 */}
+                                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                                    <h3 className="font-bold text-lg mb-1">도착지</h3>
+                                    <p className="text-xs text-red-500 mb-4">필수 입력칸을 모두 작성해주세요.</p>
+                                    <div className="space-y-3">
+                                        <div className="relative">
+                                            <input type="text" readOnly placeholder="주소를 입력해주세요. *" value={endInfo.address} onClick={() => openPostcode('end')} className="input-field bg-slate-50 cursor-pointer text-blue-600 font-bold" />
+                                        </div>
+                                        <input type="text" placeholder="상세주소를 입력해주세요." value={endInfo.detail} onChange={e => setEndPoint({...endInfo, detail: e.target.value})} className="input-field" />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input type="text" placeholder="상호/이름" value={endInfo.name} onChange={e => setEndPoint({...endInfo, name: e.target.value})} className="input-field" />
+                                            <input type="text" placeholder="부서명" value={endInfo.dept} onChange={e => setEndPoint({...endInfo, dept: e.target.value})} className="input-field" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input type="text" placeholder="담당자명" value={endInfo.manager} onChange={e => setEndPoint({...endInfo, manager: e.target.value})} className="input-field" />
+                                            <input type="text" placeholder="연락처" value={endInfo.phone} onChange={e => setEndPoint({...endInfo, phone: e.target.value})} className="input-field" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Section 2: 차량/물품/일정 */}
+                            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+                                    
+                                    {/* Left Column */}
+                                    <div>
+                                        <h3 className="font-bold mb-3">차량선택</h3>
+                                        <div className="grid grid-cols-4 gap-2 mb-6">
+                                            {CATEGORIES.map(cat => (
+                                                <div key={cat.id} onClick={() => setSelectedCategory(cat)} className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedCategory.id === cat.id ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-100 hover:border-slate-300'}`}>
+                                                    <div className="mb-2 text-slate-600">{cat.icon}</div>
+                                                    <span className="text-[11px] font-bold">{cat.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <h3 className="font-bold mb-2 text-sm">톤수선택</h3>
+                                                <select 
+                                                    disabled={selectedCategory.id !== 'truck'}
+                                                    value={selectedTon.id} onChange={(e) => setSelectedTon(TONS.find(t => t.id === e.target.value))}
+                                                    className="input-field disabled:bg-slate-100 disabled:text-slate-400"
+                                                >
+                                                    {TONS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold mb-2 text-sm">차종선택</h3>
+                                                <select 
+                                                    value={selectedType.id} onChange={(e) => setSelectedType(VEHICLE_TYPES.find(v => v.id === e.target.value))}
+                                                    className="input-field"
+                                                >
+                                                    {VEHICLE_TYPES.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {/* 일정 선택 */}
+                                        <div className="grid grid-cols-2 gap-4 mt-8">
+                                            <div>
+                                                <h3 className="font-bold mb-2 text-sm">상차일을 선택하세요.</h3>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setLoadDateType('now')} className={`flex-1 py-2 px-3 text-xs font-bold rounded-md border ${loadDateType === 'now' ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-slate-300 text-slate-500 hover:bg-slate-50'}`}>
+                                                        <span className="mr-1">✓</span> 지금
+                                                    </button>
+                                                    <button onClick={() => setLoadDateType('custom')} className={`flex-1 py-2 px-3 text-xs font-bold rounded-md border ${loadDateType === 'custom' ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-slate-300 text-slate-500 hover:bg-slate-50'}`}>
+                                                        지정
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold mb-2 text-sm">하차일을 선택하세요.</h3>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setUnloadDateType('today')} className={`flex-1 py-2 px-3 text-xs font-bold rounded-md border ${unloadDateType === 'today' ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-slate-300 text-slate-500 hover:bg-slate-50'}`}>
+                                                        <span className="mr-1">✓</span> 당일
+                                                    </button>
+                                                    <button onClick={() => setUnloadDateType('custom')} className={`flex-1 py-2 px-3 text-xs font-bold rounded-md border ${unloadDateType === 'custom' ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-slate-300 text-slate-500 hover:bg-slate-50'}`}>
+                                                        지정
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Column */}
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <h3 className="font-bold">물품정보</h3>
+                                            <span className="text-xs text-slate-400">다중 선택이 가능합니다.</span>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-4 gap-2 mb-2 text-center text-xs font-bold text-slate-500 bg-slate-50 py-2 rounded-md">
+                                            <div>파레트</div>
+                                            <div>박스</div>
+                                            <div>가구</div>
+                                            <div>기타</div>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-4 gap-2 mb-6">
+                                            {/* Dummy inputs to mock the UI exactly as screenshot */}
+                                            <div className="space-y-2">
+                                                <input type="text" placeholder="개수입력" className="input-field text-center text-xs" />
+                                                <select className="input-field text-xs"><option>규격선택</option></select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <input type="text" placeholder="수량입력" className="input-field text-center text-xs" />
+                                                <select className="input-field text-xs"><option>규격선택</option></select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <input type="text" placeholder="개수입력" className="input-field text-center text-xs" />
+                                                <input type="text" placeholder="중량(t)입력" className="input-field text-center text-xs" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <input type="text" placeholder="물품명 입력" className="input-field text-center text-xs" />
+                                            </div>
+                                        </div>
+
+                                        <h3 className="font-bold mb-2 text-sm">물품 추가정보</h3>
+                                        <textarea 
+                                            placeholder="추가정보를 입력해주세요." 
+                                            className="w-full h-24 p-3 border border-slate-200 rounded-md text-sm outline-none focus:border-blue-500 resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {/* Section 3: 상하차 방법 및 동승여부 */}
+                            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold">상하차 방법 및 동승여부</h3>
+                                        <span className="text-xs text-red-500">추가 요금이 발생할 수 있습니다.</span>
+                                    </div>
+                                    <label className="flex items-center gap-2 cursor-pointer bg-slate-100 px-3 py-1.5 rounded-full">
+                                        <input type="checkbox" checked={isPassenger} onChange={() => setIsPassenger(!isPassenger)} className="w-4 h-4 accent-slate-400" />
+                                        <span className="text-sm font-medium text-slate-600">동승 1인</span>
+                                    </label>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                    {METHOD_OPTIONS.map(opt => (
+                                        <div key={opt.id} onClick={() => setSelectedMethod(opt)} className={`p-4 rounded-md border cursor-pointer transition-all ${selectedMethod.id === opt.id ? 'border-blue-500 bg-blue-50/30' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedMethod.id === opt.id ? 'border-blue-500' : 'border-slate-300'}`}>
+                                                    {selectedMethod.id === opt.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                                                </div>
+                                                <span className={`text-sm font-bold ${selectedMethod.id === opt.id ? 'text-blue-600' : 'text-slate-700'}`}>{opt.name}</span>
+                                            </div>
+                                            <p className="text-xs text-slate-500 leading-snug">{opt.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                         </div>
                     </main>
 
+                    {/* Right Sidebar (Dark Theme) */}
+                    <aside className="w-[340px] bg-[#222831] text-white flex flex-col h-full flex-shrink-0 relative z-20 shadow-[-4px_0_15px_rgba(0,0,0,0.1)] custom-scrollbar overflow-y-auto">
+                        <div className="p-6">
+                            {/* 운송요금 */}
+                            <h2 className="text-sm font-bold text-slate-300 mb-4">운송요금</h2>
+                            <div className="flex justify-between items-end mb-6">
+                                <div>
+                                    <p className="text-xs text-slate-400 mb-1">운송거리</p>
+                                    <p className="text-2xl font-black">{distance}<span className="text-base font-medium text-slate-400 ml-1">km</span></p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-slate-400 mb-1">AI 추천요금</p>
+                                    {isFetchingQuote ? (
+                                        <div className="flex items-center gap-2 text-xl font-black">
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            <span>계산중</span>
+                                        </div>
+                                    ) : (
+                                        <p className="text-2xl font-black">{formatPrice(calculation)}<span className="text-base font-medium text-slate-400 ml-1">원</span></p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 추가요금 */}
+                            <h2 className="text-sm font-bold text-slate-300 mb-2">추가요금</h2>
+                            <div className="flex items-center gap-2 mb-4">
+                                <button onClick={() => setExtraCost(Math.max(0, extraCost - 5000))} className="w-10 h-10 bg-slate-700 rounded flex items-center justify-center hover:bg-slate-600 font-bold text-lg">-</button>
+                                <div className="flex-1 bg-slate-800 rounded h-10 flex items-center justify-end px-3 border border-slate-700">
+                                    <input type="number" value={extraCost} onChange={e => setExtraCost(Number(e.target.value))} className="bg-transparent text-right w-full outline-none font-bold" />
+                                    <span className="text-slate-400 ml-1 text-sm">원</span>
+                                </div>
+                                <button onClick={() => setExtraCost(extraCost + 5000)} className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center hover:bg-blue-500 font-bold text-lg">+</button>
+                            </div>
+
+                            {/* Total */}
+                            <div className="bg-white rounded-lg text-slate-900 p-4 mb-3 text-right">
+                                <span className="text-sm font-bold mr-2">총</span>
+                                <span className="text-3xl font-black text-blue-600">{formatPrice(finalTotal)}</span>
+                                <span className="text-sm font-bold text-blue-600 ml-1">원</span>
+                            </div>
+
+                            <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-6">
+                                <span className="text-xs text-slate-400">직접 금액을 입력해주세요.</span>
+                                <label className="flex items-center gap-1.5 cursor-pointer">
+                                    <div className="w-4 h-4 rounded-full border border-slate-400 flex items-center justify-center bg-slate-300">
+                                        <div className="w-2 h-2 bg-slate-600 rounded-full"></div>
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-300">AI 추천단가</span>
+                                </label>
+                            </div>
+
+                            {/* 고객정보 */}
+                            <h2 className="text-sm font-bold text-slate-300 mb-3">고객정보</h2>
+                            <div className="bg-white rounded-lg p-4 mb-8 text-slate-800">
+                                <div className="flex gap-4 mb-4">
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold">
+                                        <input type="radio" name="customer" checked={customerInfoType === 'sameAsStart'} onChange={() => setCustomerInfoType('sameAsStart')} className="accent-slate-500" /> 출발지와 동일
+                                    </label>
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold">
+                                        <input type="radio" name="customer" checked={customerInfoType === 'sameAsEnd'} onChange={() => setCustomerInfoType('sameAsEnd')} className="accent-slate-500" /> 도착지와 동일
+                                    </label>
+                                </div>
+                                <input type="text" placeholder="이름/상호" className="w-full border-b border-slate-200 py-2 text-sm outline-none mb-2" />
+                                <input type="text" placeholder="연락처" className="w-full border-b border-slate-200 py-2 text-sm outline-none mb-4" />
+                                <div className="bg-red-50 text-red-500 text-[10px] p-2 rounded text-center font-medium">
+                                    * 접수를 하시면 자동로그인 됩니다.
+                                </div>
+                            </div>
+
+                            {/* 결제방법 */}
+                            <h2 className="text-sm font-bold text-slate-300 mb-3">결제방법</h2>
+                            <div className="grid grid-cols-3 gap-2 mb-4">
+                                <label className={`flex flex-col items-center p-3 rounded-lg border cursor-pointer transition-colors ${paymentMethod === 'prepaid' ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-600 bg-transparent text-white hover:bg-slate-800'}`}>
+                                    <input type="radio" name="payment" className="hidden" onChange={() => setPaymentMethod('prepaid')} />
+                                    <div className={`w-3 h-3 rounded-full border mb-2 flex items-center justify-center ${paymentMethod === 'prepaid' ? 'border-blue-500' : 'border-slate-400'}`}>
+                                        {paymentMethod === 'prepaid' && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                                    </div>
+                                    <span className="text-xs font-bold">선불(현금)</span>
+                                </label>
+                                <label className={`flex flex-col items-center p-3 rounded-lg border cursor-pointer transition-colors ${paymentMethod === 'postpaid' ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-600 bg-transparent text-white hover:bg-slate-800'}`}>
+                                    <input type="radio" name="payment" className="hidden" onChange={() => setPaymentMethod('postpaid')} />
+                                    <div className={`w-3 h-3 rounded-full border mb-2 flex items-center justify-center ${paymentMethod === 'postpaid' ? 'border-blue-500' : 'border-slate-400'}`}>
+                                        {paymentMethod === 'postpaid' && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                                    </div>
+                                    <span className="text-xs font-bold">착불(현금)</span>
+                                </label>
+                                <label className={`flex flex-col items-center p-3 rounded-lg border cursor-pointer transition-colors ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-600 bg-transparent text-white hover:bg-slate-800'}`}>
+                                    <input type="radio" name="payment" className="hidden" onChange={() => setPaymentMethod('card')} />
+                                    <div className={`w-3 h-3 rounded-full border mb-2 flex items-center justify-center ${paymentMethod === 'card' ? 'border-blue-500' : 'border-slate-400'}`}>
+                                        {paymentMethod === 'card' && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                                    </div>
+                                    <span className="text-xs font-bold">신용카드</span>
+                                </label>
+                            </div>
+
+                            {/* 간편결제 */}
+                            <div className="grid grid-cols-2 gap-2 mb-6">
+                                <button className="bg-white rounded-lg py-2 flex items-center justify-center h-10">
+                                    <span className="text-blue-600 font-black italic text-lg">toss<span className="text-slate-800">pay</span></span>
+                                </button>
+                                <button className="bg-[#FAE100] rounded-lg py-2 flex items-center justify-center h-10">
+                                    <span className="text-[#391B1B] font-black text-sm">카카오페이</span>
+                                </button>
+                            </div>
+
+                            <p className="text-[10px] text-slate-400 leading-relaxed mb-6">
+                                신용카드/간편결제 및 계산서 발행은 VAT별도입니다.<br/>
+                                배차취소는 <strong className="text-slate-300">콜센터(1522-7123)</strong>를 통해 접수해주세요.
+                            </p>
+
+                            <button onClick={() => showToast('배차 신청이 접수되었습니다!')} className="w-full bg-slate-300 hover:bg-white text-slate-800 font-black py-4 rounded-lg transition-colors text-lg">
+                                배차신청
+                            </button>
+                        </div>
+                    </aside>
+
                     {/* 주소 검색 모달 */}
                     {isPostcodeVisible && (
-                        <div className="fixed inset-0 bg-[#0F172A]/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4 overflow-hidden"
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99999] flex items-center justify-center p-4"
                             onClick={(e) => { if(e.target === e.currentTarget) setIsPostcodeVisible(false); }}>
-                            <div className="bg-white w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col h-[600px] border border-white/20">
-                                <div className="p-6 border-b flex justify-between items-center bg-white font-black text-slate-900">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-blue-50 p-2.5 rounded-2xl"><Icon name="Search" className="w-5 h-5 text-blue-600" /></div>
-                                        <span className="text-lg tracking-tight">{postcodeTarget === 'start' ? '상차지' : '하차지'} 주소 검색</span>
-                                    </div>
-                                    <button onClick={() => setIsPostcodeVisible(false)} className="p-2.5 hover:bg-slate-100 rounded-full transition-colors"><Icon name="X" className="w-6 h-6 text-slate-300"/></button>
+                            <div className="bg-white w-full max-w-lg rounded-xl overflow-hidden shadow-2xl flex flex-col h-[600px]">
+                                <div className="p-4 border-b flex justify-between items-center bg-slate-50">
+                                    <span className="font-bold text-slate-800">{postcodeTarget === 'start' ? '출발지' : '도착지'} 주소 검색</span>
+                                    <button onClick={() => setIsPostcodeVisible(false)} className="p-1 hover:bg-slate-200 rounded"><Icon name="X" className="w-5 h-5 text-slate-500"/></button>
                                 </div>
                                 <div ref={postcodeContainerRef} className="w-full flex-1 bg-white relative">
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 gap-4">
-                                        <div className="loading-spin" />
-                                        <p className="text-[11px] font-black tracking-widest uppercase opacity-50">Connecting Kakao API...</p>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300">
+                                        <div className="loading-spin mb-2" />
+                                        <span className="text-xs font-bold">카카오 주소검색 로딩중...</span>
                                     </div>
-                                </div>
-                                <div className="p-5 bg-slate-50 text-center text-[9px] text-slate-400 font-black uppercase tracking-[0.3em] border-t border-slate-100">
-                                    itgo Logistics Intelligence
                                 </div>
                             </div>
                         </div>
