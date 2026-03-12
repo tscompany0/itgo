@@ -126,7 +126,7 @@
         const INSUNG_M_CODE = '7597';            
         const INSUNG_CC_CODE = '13016';          
         const INSUNG_TOKEN = 'ad3f4419d04864bb2ae27c03b1d27c3e'; 
-        const INSUNG_USER_ID = '티에스컴퍼니';   // 실사용시 반드시 교체
+        const INSUNG_USER_ID = '티에스컴퍼니';   // 한글 아이디 적용 완료
 
         function App() {
             // 상세 주소 및 연락처 폼 상태
@@ -204,15 +204,39 @@
                 }
             }, [isPostcodeVisible, postcodeTarget]);
 
+            // 🚀 실제 주행 거리(내비게이션) API 연동
             useEffect(() => {
-                if (startInfo.x && endInfo.x) {
-                    const R = 6371;
-                    const dLat = (endInfo.y - startInfo.y) * (Math.PI / 180);
-                    const dLon = (endInfo.x - startInfo.x) * (Math.PI / 180);
-                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(startInfo.y * (Math.PI/180)) * Math.cos(endInfo.y * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                    setDistance(Math.max(1, Math.round(R * c * 1.3))); 
-                }
+                const calculateDistance = async () => {
+                    if (startInfo.x && endInfo.x) {
+                        try {
+                            // 카카오 모빌리티(내비게이션) API로 실제 차량 주행 거리 요청
+                            const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${startInfo.x},${startInfo.y}&destination=${endInfo.x},${endInfo.y}`;
+                            const response = await fetch(url, {
+                                headers: { Authorization: `KakaoAK ${KAKAO_API_KEY}` }
+                            });
+                            const data = await response.json();
+                            
+                            if (data.routes && data.routes.length > 0) {
+                                // m 단위를 km 단위로 변환 후 소수점 2자리까지 표시 (예: 45.16)
+                                const distanceKm = (data.routes[0].summary.distance / 1000).toFixed(2);
+                                setDistance(Number(distanceKm));
+                                return; // 성공 시 함수 종료
+                            }
+                        } catch (e) {
+                            console.error("내비게이션 API 에러, 직선거리로 대체합니다.", e);
+                        }
+                        
+                        // 통신 실패나 경로를 찾을 수 없을 때만 기존 직선거리 공식 작동
+                        const R = 6371;
+                        const dLat = (endInfo.y - startInfo.y) * (Math.PI / 180);
+                        const dLon = (endInfo.x - startInfo.x) * (Math.PI / 180);
+                        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(startInfo.y * (Math.PI/180)) * Math.cos(endInfo.y * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        setDistance(Math.max(1, Math.round(R * c * 1.3))); 
+                    }
+                };
+                
+                calculateDistance();
             }, [startInfo, endInfo]);
 
             // 인성데이타 API 호출 로직
@@ -221,10 +245,14 @@
                     if (distance > 0) {
                         setIsFetchingQuote(true);
                         try {
-                            if (INSUNG_USER_ID === 'YOUR_USER_ID' || !INSUNG_USER_ID) {
+                            if (!INSUNG_USER_ID || INSUNG_USER_ID === 'YOUR_USER_ID') {
                                 throw new Error("API ID 미입력");
                             }
-                            const url = `${INSUNG_API_URL}?type=json&m_code=${INSUNG_M_CODE}&cc_code=${INSUNG_CC_CODE}&token=${INSUNG_TOKEN}&user_id=${INSUNG_USER_ID}&distance=${distance}`;
+                            
+                            // 🚀 한글 아이디 처리를 위해 encodeURIComponent 적용 (서버 에러 방지)
+                            const encodedUserId = encodeURIComponent(INSUNG_USER_ID);
+                            const url = `${INSUNG_API_URL}?type=json&m_code=${INSUNG_M_CODE}&cc_code=${INSUNG_CC_CODE}&token=${INSUNG_TOKEN}&user_id=${encodedUserId}&distance=${distance}`;
+                            
                             const response = await fetch(url);
                             const data = await response.json();
                             
@@ -642,7 +670,7 @@
 
                             <p className="text-[10px] text-slate-400 leading-relaxed mb-6">
                                 신용카드/간편결제 및 계산서 발행은 VAT별도입니다.<br/>
-                                배차취소는 <strong className="text-slate-300">콜센터(1522-7123)</strong>를 통해 접수해주세요.
+                                배차취소는 <strong className="text-slate-300">콜센터(1844-1562)</strong>를 통해 접수해주세요.
                             </p>
 
                             <button onClick={() => showToast('배차 신청이 접수되었습니다!')} className="w-full bg-slate-300 hover:bg-white text-slate-800 font-black py-4 rounded-lg transition-colors text-lg">
@@ -678,4 +706,3 @@
     </script>
 </body>
 </html>
-
