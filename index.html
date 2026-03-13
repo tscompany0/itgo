@@ -17,14 +17,14 @@
         
         body {
             font-family: 'Noto Sans KR', 'Inter', sans-serif;
-            background-color: #F8FAFC;
+            background-color: #F1F5F9; /* 배경을 살짝 어둡게 눌러서 하얀색 카드가 돋보이게 수정 */
             -webkit-font-smoothing: antialiased;
-            color: #1E293B;
+            color: #0F172A; /* 전체 기본 텍스트 톤을 한 단계 진하게 */
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         
         input[type='number']::-webkit-inner-spin-button, 
         input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -47,17 +47,17 @@
 
         .content-card {
             background: white;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+            border: 1px solid #E2E8F0; /* 카드 테두리를 더 선명하게 */
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04); /* 그림자 강화 */
             transition: all 0.3s ease;
         }
         
         .section-title {
-            font-size: 0.75rem;
+            font-size: 1.1rem; /* 글씨 크기 대폭 확대 (기존 0.8rem) */
             font-weight: 900;
-            color: #64748B;
+            color: #475569; /* 타이틀 색상 진하게 (기존 #64748B) */
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -118,7 +118,6 @@
             { id: 'truck', name: '트럭', img: 'truck.jpg' },
         ];
 
-        // 차량 제원 로직 최대치 반영 수정 (폭 x 길이 미터 기준)
         const TONS = [
             { id: '1ton', name: '1t (폭 1.6m * 길이 2.8m)', table: PRICING_DATA.trucks['1ton'] },
             { id: '1.4ton', name: '1.4t (폭 1.7m * 길이 3.1m)', table: PRICING_DATA.trucks['1.4ton'] },
@@ -133,27 +132,12 @@
         ];
 
         const VEHICLE_TYPES = [
-            { group: '카고계열', types: [
-                { id: 'cargo', name: '카고', surcharge: 0 },
-                { id: 'plus_cargo', name: '플러스카고', surcharge: 10000 },
-                { id: 'chuk_cargo', name: '축카고', surcharge: 20000 },
-            ]},
-            { group: '윙바디계열', types: [
-                { id: 'wing', name: '윙바디', surcharge: 20000 },
-                { id: 'plus_wing', name: '플러스윙', surcharge: 30000 },
-                { id: 'chuk_wing', name: '축윙', surcharge: 40000 },
-            ]},
-            { group: '탑/냉동계열', types: [
-                { id: 'top', name: '탑차', surcharge: 10000 },
-                { id: 'freezer_top', name: '냉동탑', surcharge: 40000 },
-                { id: 'freezer_wing', name: '냉동윙', surcharge: 50000 },
-            ]},
-            { group: '특수/리프트', types: [
-                { id: 'lift_cargo', name: '리프트카고', surcharge: 30000 },
-                { id: 'lift_wing', name: '리프트윙', surcharge: 45000 },
-                { id: 'extra_long', name: '초장축', surcharge: 20000 },
-            ]}
-        ];
+            "전체", "카고/윙", "카고", "플러스카고", "축카고", "플축카고", "리프트카고", "플러스리",
+            "플축리", "윙바디", "플러스윙", "축윙", "플축윙", "리프트윙", "플러스윙리", "플축윙리",
+            "탑", "리프트탑", "호루", "리프트호루", "자바라", "리프트자바라", "냉동탑", "냉장탑",
+            "냉동윙", "냉장윙", "냉동탑리", "냉장탑리", "냉동플축윙", "냉장플축윙", "냉동플축리", "냉장플축리",
+            "평카", "로브이", "츄레라", "로베드", "사다리", "초장축", "광폭", "플축카고/윙"
+        ].map((name, idx) => ({ id: `type_${idx}`, name, surcharge: 0 }));
 
         const ITEM_CATEGORIES = [
             { id: 'pallet', name: '파레트', icon: '📦', sizes: ['1100*1100', '1200*1000', 'KPP규격', '기타'] },
@@ -200,7 +184,6 @@
         };
 
         function App() {
-            // 상차지/하차지 상태 관리에 이름/연락처 추가
             const [startPoint, setStartPoint] = useState({ address: '', x: null, y: null });
             const [startInfo, setStartInfo] = useState({ name: '', phone: '' });
             
@@ -212,13 +195,15 @@
 
             const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[3]);
             const [selectedTon, setSelectedTon] = useState(TONS[0]);
-            const [selectedType, setSelectedType] = useState(VEHICLE_TYPES[0].types[0]);
+            const [selectedType, setSelectedType] = useState(VEHICLE_TYPES[0]);
+            const [isTypeModalVisible, setIsTypeModalVisible] = useState(false);
             
             const [selectedMethod, setSelectedMethod] = useState(METHOD_OPTIONS[0]);
             const [isPassenger, setIsPassenger] = useState(false);
             const [isRoundTrip, setIsRoundTrip] = useState(false);
             const [waypointCount, setWaypointCount] = useState(0);
             const [weatherType, setWeatherType] = useState('none'); 
+            const [extraOptionCount, setExtraOptionCount] = useState(0);
 
             const [selectedItemCat, setSelectedItemCat] = useState(ITEM_CATEGORIES[0]);
             const [itemQty, setItemQty] = useState(1);
@@ -314,11 +299,12 @@
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
                 if (waypointCount > 0) total += (waypointCount * 10000);
+                if (extraOptionCount > 0) total += (extraOptionCount * 10000);
                 if (isRoundTrip) total *= 1.7;
                 if (weatherType !== 'none') total *= 1.2;
 
                 return Math.floor(total / 1000) * 1000;
-            }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, weatherType]);
+            }, [distance, selectedCategory, selectedTon, selectedType, selectedMethod, isPassenger, isRoundTrip, waypointCount, extraOptionCount, weatherType]);
 
             const formatPrice = (p) => new Intl.NumberFormat('ko-KR').format(p);
 
@@ -328,24 +314,12 @@
             };
 
             const copyQuote = () => {
-                // 견적서 복사 시 텍스트 구성 수정 및 고객정보 포함
                 const startNameStr = startInfo.name ? `\n- 고객명(상호): ${startInfo.name}` : '';
                 const startPhoneStr = startInfo.phone ? `\n- 연락처: ${startInfo.phone}` : '';
                 const endNameStr = endInfo.name ? `\n- 고객명(상호): ${endInfo.name}` : '';
                 const endPhoneStr = endInfo.phone ? `\n- 연락처: ${endInfo.phone}` : '';
 
-                const text = `[화물 운송 견적서]
-
-[출발지 (상차)]
-- 주소: ${startPoint.address || '미지정'}${startNameStr}${startPhoneStr}
-
-[도착지 (하차)]
-- 주소: ${endPoint.address || '미지정'}${endNameStr}${endPhoneStr}
-
-[운송 정보]
-- 차량: ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''}
-- 거리: ${distance}km (계산기준: ${Math.ceil(distance/5)*5}km)
-- 예상운임: ${formatPrice(calculation)}원`;
+                const text = `[화물 운송 견적서]\n\n[출발지 (상차)]\n- 주소: ${startPoint.address || '미지정'}${startNameStr}${startPhoneStr}\n\n[도착지 (하차)]\n- 주소: ${endPoint.address || '미지정'}${endNameStr}${endPhoneStr}\n\n[운송 정보]\n- 차량: ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''}\n- 거리: ${distance}km (계산기준: ${Math.ceil(distance/5)*5}km)\n- 예상운임: ${formatPrice(calculation)}원`;
 
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
@@ -371,20 +345,20 @@
 
                     <header className="max-w-7xl mx-auto mb-12 flex items-center justify-between">
                         <div className="flex items-center gap-5">
-                            <div className="bg-blue-600 p-3 rounded-[24px] shadow-xl flex items-center justify-center overflow-hidden w-20 h-20 md:w-24 md:h-24">
+                            <div className="bg-blue-600 p-3 rounded-[24px] shadow-lg flex items-center justify-center overflow-hidden w-20 h-20 md:w-24 md:h-24">
                                 <Icon name="Truck" className="w-10 h-10 text-white" />
                             </div>
                             <div className="hidden sm:block">
-                                <h1 className="text-xl font-black tracking-tight">통합 단가 매니저</h1>
-                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-0.5">빠르고 안전한 화물 운송 솔루션</p>
+                                <h1 className="text-xl font-black tracking-tight text-slate-800">통합 단가 매니저</h1>
+                                <p className="text-[12px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-0.5">빠르고 안전한 화물 운송 솔루션</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-6">
                             <div className="text-right hidden lg:block">
-                                <p className="text-[10px] text-slate-400 font-black mb-0.5 uppercase">고객센터</p>
+                                <p className="text-[11px] text-slate-500 font-black mb-0.5 uppercase">사용문의</p>
                                 <p className="text-lg font-black text-blue-600">1844-1562</p>
                             </div>
-                            <button onClick={() => window.location.reload()} className="p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-blue-600 transition-all shadow-sm">
+                            <button onClick={() => window.location.reload()} className="p-3 bg-white rounded-2xl border border-slate-300 text-slate-500 hover:text-blue-600 hover:border-blue-400 transition-all shadow-sm">
                                 <Icon name="RotateCcw" className="w-5 h-5" />
                             </button>
                         </div>
@@ -392,36 +366,34 @@
 
                     <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pb-24">
                         <div className="lg:col-span-8 space-y-8">
-                            {/* 01. 구간지 설정 (고객정보 입력란 포함) */}
+                            {/* 01. 구간지 설정 */}
                             <section className="content-card p-8 rounded-[40px]">
-                                <h2 className="section-title"><Icon name="Navigation" className="w-4 h-4 text-blue-500" /> 01. 출발지/도착지 및 고객정보 설정</h2>
+                                <h2 className="section-title"><Icon name="Navigation" className="w-5 h-5 text-blue-500" /> 01. 출발지/도착지 및 고객정보 설정</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {/* 출발지 */}
                                     <div className="space-y-4">
-                                        <p className="text-[12px] font-bold text-slate-500 ml-1">출발지 (상차)</p>
-                                        <div onClick={() => openPostcode('start')} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-white transition-all flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-blue-500"><Icon name="MapPin" className="w-5 h-5" /></div>
-                                            <span className={`text-sm font-bold truncate flex-1 ${startPoint.address ? 'text-slate-900' : 'text-slate-300'}`}>
+                                        <p className="text-[13px] font-bold text-slate-700 ml-1">출발지 (상차)</p>
+                                        <div onClick={() => openPostcode('start')} className="p-4 bg-white border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-blue-500 hover:shadow-md transition-all flex items-center gap-4 shadow-sm">
+                                            <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-blue-500"><Icon name="MapPin" className="w-5 h-5" /></div>
+                                            <span className={`text-sm font-bold truncate flex-1 ${startPoint.address ? 'text-slate-900' : 'text-slate-400'}`}>
                                                 {startPoint.address || '주소를 검색해 주세요 *'}
                                             </span>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <input type="text" placeholder="고객명(상호)" value={startInfo.name} onChange={(e) => setStartInfo({...startInfo, name: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-colors" />
-                                            <input type="tel" placeholder="연락처" value={startInfo.phone} onChange={(e) => setStartInfo({...startInfo, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-colors" />
+                                            <input type="text" placeholder="고객명(상호)" value={startInfo.name} onChange={(e) => setStartInfo({...startInfo, name: e.target.value})} className="w-full p-3.5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-colors shadow-sm text-slate-800 placeholder-slate-400" />
+                                            <input type="tel" placeholder="연락처" value={startInfo.phone} onChange={(e) => setStartInfo({...startInfo, phone: e.target.value})} className="w-full p-3.5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-colors shadow-sm text-slate-800 placeholder-slate-400" />
                                         </div>
                                     </div>
-                                    {/* 도착지 */}
                                     <div className="space-y-4">
-                                        <p className="text-[12px] font-bold text-slate-500 ml-1">도착지 (하차)</p>
-                                        <div onClick={() => openPostcode('end')} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:border-orange-500 hover:bg-white transition-all flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-orange-500"><Icon name="MapPin" className="w-5 h-5" /></div>
-                                            <span className={`text-sm font-bold truncate flex-1 ${endPoint.address ? 'text-slate-900' : 'text-slate-300'}`}>
+                                        <p className="text-[13px] font-bold text-slate-700 ml-1">도착지 (하차)</p>
+                                        <div onClick={() => openPostcode('end')} className="p-4 bg-white border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-orange-500 hover:shadow-md transition-all flex items-center gap-4 shadow-sm">
+                                            <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-orange-500"><Icon name="MapPin" className="w-5 h-5" /></div>
+                                            <span className={`text-sm font-bold truncate flex-1 ${endPoint.address ? 'text-slate-900' : 'text-slate-400'}`}>
                                                 {endPoint.address || '주소를 검색해 주세요 *'}
                                             </span>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <input type="text" placeholder="고객명(상호)" value={endInfo.name} onChange={(e) => setEndInfo({...endInfo, name: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-orange-500 focus:bg-white transition-colors" />
-                                            <input type="tel" placeholder="연락처" value={endInfo.phone} onChange={(e) => setEndInfo({...endInfo, phone: e.target.value})} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:border-orange-500 focus:bg-white transition-colors" />
+                                            <input type="text" placeholder="고객명(상호)" value={endInfo.name} onChange={(e) => setEndInfo({...endInfo, name: e.target.value})} className="w-full p-3.5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-orange-500 transition-colors shadow-sm text-slate-800 placeholder-slate-400" />
+                                            <input type="tel" placeholder="연락처" value={endInfo.phone} onChange={(e) => setEndInfo({...endInfo, phone: e.target.value})} className="w-full p-3.5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-orange-500 transition-colors shadow-sm text-slate-800 placeholder-slate-400" />
                                         </div>
                                     </div>
                                 </div>
@@ -429,78 +401,73 @@
 
                             {/* 02. 차량 제원 선택 */}
                             <section className="content-card p-8 rounded-[40px]">
-                                <h2 className="section-title"><Icon name="Truck" className="w-4 h-4 text-blue-500" /> 02. 차량 및 제원 선택</h2>
+                                <h2 className="section-title"><Icon name="Truck" className="w-5 h-5 text-blue-500" /> 02. 차량 및 제원 선택</h2>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
                                     {CATEGORIES.map(cat => (
-                                        <button key={cat.id} onClick={() => setSelectedCategory(cat)} className={`flex flex-col items-center p-4 rounded-[32px] border-2 transition-all ${selectedCategory.id === cat.id ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' : 'border-transparent bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                                            <div className={`mb-3 w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden bg-white shadow-sm border ${selectedCategory.id === cat.id ? 'border-blue-200' : 'border-slate-100'}`}>
+                                        <button key={cat.id} onClick={() => setSelectedCategory(cat)} className={`flex flex-col items-center p-4 rounded-[32px] border-2 transition-all ${selectedCategory.id === cat.id ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-md' : 'border-slate-200 bg-white text-slate-500 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}>
+                                            <div className={`mb-3 w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden bg-white shadow-sm border ${selectedCategory.id === cat.id ? 'border-blue-300' : 'border-slate-100'}`}>
                                                 <img src={cat.img} alt={cat.name} className="w-full h-full object-contain" onError={(e) => {
                                                     e.target.style.display = 'none';
                                                     e.target.parentNode.innerHTML = `<span class="text-[12px] text-slate-400 font-bold">${cat.name}</span>`;
                                                 }} />
                                             </div>
-                                            <span className="font-bold text-[11px]">{cat.name}</span>
+                                            <span className="font-bold text-[12px]">{cat.name}</span>
                                         </button>
                                     ))}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-7 bg-slate-50/50 rounded-[32px] border border-slate-100">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-7 bg-slate-50 rounded-[32px] border border-slate-200">
                                     <div className="space-y-2.5">
-                                        <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-wider">톤수 선택</label>
+                                        <label className="text-[11px] font-black text-slate-600 ml-1 uppercase tracking-wider">톤수 선택</label>
                                         <div className="relative">
-                                            <select disabled={selectedCategory.id !== 'truck'} value={selectedTon.id} onChange={(e) => setSelectedTon(TONS.find(t => t.id === e.target.value))} className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-sm appearance-none outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all disabled:opacity-40">
+                                            <select disabled={selectedCategory.id !== 'truck'} value={selectedTon.id} onChange={(e) => setSelectedTon(TONS.find(t => t.id === e.target.value))} className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-sm text-slate-800 appearance-none outline-none focus:border-blue-500 transition-all disabled:opacity-60 disabled:bg-slate-100 shadow-sm">
                                                 {TONS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                             </select>
-                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                                 <Icon name="ChevronDown" className="w-4 h-4" />
                                             </div>
                                         </div>
                                     </div>
                                     <div className="space-y-2.5">
-                                        <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-wider">상세 차종</label>
-                                        <div className="relative">
-                                            <select value={selectedType.id} onChange={(e) => { const allTypes = VEHICLE_TYPES.flatMap(g => g.types); setSelectedType(allTypes.find(v => v.id === e.target.value)); }} className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-sm appearance-none outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
-                                                {VEHICLE_TYPES.map(group => (
-                                                    <optgroup key={group.group} label={group.group} className="text-slate-400 font-bold bg-white">
-                                                        {group.types.map(v => ( <option key={v.id} value={v.id} className="text-slate-900">{v.name}</option> ))}
-                                                    </optgroup>
-                                                ))}
-                                            </select>
-                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
-                                                <Icon name="ChevronDown" className="w-4 h-4" />
-                                            </div>
+                                        <label className="text-[11px] font-black text-slate-600 ml-1 uppercase tracking-wider">상세 차종</label>
+                                        <div 
+                                            onClick={() => { if (selectedCategory.id === 'truck' || selectedCategory.id === 'labo') setIsTypeModalVisible(true); }}
+                                            className={`w-full p-4 border-2 border-slate-200 rounded-2xl font-bold text-sm transition-all flex justify-between items-center shadow-sm ${selectedCategory.id === 'truck' || selectedCategory.id === 'labo' ? 'bg-white cursor-pointer hover:border-blue-500 text-slate-800' : 'bg-slate-100 cursor-not-allowed opacity-60 text-slate-500'}`}
+                                        >
+                                            <span>{selectedCategory.id === 'truck' || selectedCategory.id === 'labo' ? selectedType.name : '해당 없음'}</span>
+                                            <Icon name="ChevronDown" className="w-4 h-4 text-slate-400" />
                                         </div>
                                     </div>
                                 </div>
                             </section>
 
                             <section className="content-card p-8 rounded-[40px]">
-                                <h2 className="section-title"><Icon name="Package" className="w-4 h-4 text-blue-500" /> 03. 운송 화물 정보</h2>
+                                <h2 className="section-title"><Icon name="Package" className="w-5 h-5 text-blue-500" /> 03. 운송 화물 정보</h2>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
                                     {ITEM_CATEGORIES.map(cat => (
-                                        <button key={cat.id} onClick={() => { setSelectedItemCat(cat); setItemSize(cat.sizes[0]); }} className={`flex flex-col items-center py-5 rounded-[28px] border-2 transition-all ${selectedItemCat.id === cat.id ? 'border-slate-800 bg-slate-800 text-white shadow-xl' : 'bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100'}`}>
+                                        <button key={cat.id} onClick={() => { setSelectedItemCat(cat); setItemSize(cat.sizes[0]); }} className={`flex flex-col items-center py-5 rounded-[28px] border-2 transition-all ${selectedItemCat.id === cat.id ? 'border-slate-800 bg-slate-800 text-white shadow-xl' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700 shadow-sm'}`}>
                                             <span className="text-2xl mb-1.5">{cat.icon}</span>
-                                            <span className="font-bold text-[11px]">{cat.name}</span>
+                                            <span className="font-bold text-[12px]">{cat.name}</span>
                                         </button>
                                     ))}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50/50 p-7 rounded-[32px] border border-slate-100">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-7 rounded-[32px] border border-slate-200">
                                     <div className="space-y-2.5">
-                                        <label className="text-[10px] font-bold text-slate-500 ml-1">수량/개수</label>
-                                        <div className="flex items-center bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                                            <input type="number" value={itemQty} onChange={(e) => setItemQty(parseInt(e.target.value) || 1)} className="w-full px-5 py-4 text-center font-bold text-sm outline-none bg-transparent" />
+                                        <label className="text-[11px] font-bold text-slate-600 ml-1">수량/개수</label>
+                                        <div className="flex items-center bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
+                                            <input type="number" value={itemQty} onChange={(e) => setItemQty(parseInt(e.target.value) || 1)} className="w-full px-5 py-3.5 text-center font-bold text-sm text-slate-800 outline-none bg-transparent" />
                                         </div>
                                     </div>
                                     <div className="space-y-2.5">
-                                        <label className="text-[10px] font-bold text-slate-500 ml-1">규격 선택</label>
-                                        <select value={itemSize} onChange={(e) => setItemSize(e.target.value)} className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none cursor-pointer">
+                                        <label className="text-[11px] font-bold text-slate-600 ml-1">규격 선택</label>
+                                        <select value={itemSize} onChange={(e) => setItemSize(e.target.value)} className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-sm text-slate-800 outline-none cursor-pointer shadow-sm focus:border-blue-500">
                                             {selectedItemCat.sizes.map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
                                     </div>
                                     <div className="space-y-2.5">
-                                        <label className="text-[10px] font-bold text-slate-500 ml-1">총 중량(t)</label>
+                                        <label className="text-[11px] font-bold text-slate-600 ml-1">총 중량(t)</label>
                                         <div className="relative">
-                                            <input type="number" step="0.1" value={itemWeight} onChange={(e) => setItemWeight(parseFloat(e.target.value) || 0)} className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-bold text-sm outline-none" />
-                                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase">ton</span>
+                                            <input type="number" step="0.1" value={itemWeight} onChange={(e) => setItemWeight(parseFloat(e.target.value) || 0)} className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-sm text-slate-800 outline-none shadow-sm focus:border-blue-500" />
+                                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">ton</span>
                                         </div>
                                     </div>
                                 </div>
@@ -508,55 +475,72 @@
 
                             <section className="content-card p-8 rounded-[40px]">
                                 <div className="flex justify-between items-center mb-8">
-                                    <h2 className="section-title mb-0"><Icon name="Plus" className="w-4 h-4 text-blue-500" /> 04. 추가 옵션 및 할증</h2>
-                                    <button onClick={() => setIsPassenger(!isPassenger)} className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl font-bold text-xs transition-all ${isPassenger ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
+                                    <h2 className="section-title mb-0"><Icon name="Plus" className="w-5 h-5 text-blue-500" /> 04. 추가 옵션 및 할증</h2>
+                                    <button onClick={() => setIsPassenger(!isPassenger)} className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl font-bold text-xs transition-all border-2 ${isPassenger ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}>
                                         {isPassenger && <Icon name="Check" className="w-3.5 h-3.5" />} 동승 1인 (+1만)
                                     </button>
                                 </div>
+                                
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                                     {METHOD_OPTIONS.map(opt => (
-                                        <button key={opt.id} onClick={() => setSelectedMethod(opt)} className={`flex flex-col text-left p-5 rounded-[24px] border-2 transition-all ${selectedMethod.id === opt.id ? 'border-blue-600 bg-blue-50/50 shadow-sm' : 'border-transparent bg-slate-50 hover:bg-slate-100'}`}>
+                                        <button key={opt.id} onClick={() => setSelectedMethod(opt)} className={`flex flex-col text-left p-5 rounded-[24px] border-2 transition-all ${selectedMethod.id === opt.id ? 'border-blue-600 bg-blue-50 text-blue-800 shadow-md' : 'border-slate-200 bg-white hover:border-blue-400 shadow-sm'}`}>
                                             <div className="flex items-center gap-2 mb-3">
                                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod.id === opt.id ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white'}`}>
                                                     {selectedMethod.id === opt.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                                                 </div>
-                                                <span className={`text-[13px] font-bold ${selectedMethod.id === opt.id ? 'text-blue-700' : 'text-slate-500'}`}>{opt.name}</span>
+                                                <span className={`text-[13px] font-bold ${selectedMethod.id === opt.id ? 'text-blue-800' : 'text-slate-700'}`}>{opt.name}</span>
                                             </div>
-                                            <p className={`text-[10px] leading-relaxed ${selectedMethod.id === opt.id ? 'text-blue-400' : 'text-slate-400'}`}>{opt.desc}</p>
+                                            <p className={`text-[11px] leading-relaxed ${selectedMethod.id === opt.id ? 'text-blue-600' : 'text-slate-500'}`}>{opt.desc}</p>
                                         </button>
                                     ))}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                    <div className={`p-5 rounded-[28px] border-2 transition-all flex items-center justify-between cursor-pointer ${isRoundTrip ? 'bg-blue-50 border-blue-600' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`} onClick={() => setIsRoundTrip(!isRoundTrip)}>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className={`p-5 rounded-[28px] border-2 transition-all flex items-center justify-between cursor-pointer shadow-sm ${isRoundTrip ? 'bg-blue-50 border-blue-600' : 'bg-white border-slate-200 hover:border-blue-400'}`} onClick={() => setIsRoundTrip(!isRoundTrip)}>
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isRoundTrip ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-300 border border-slate-100'}`}><Icon name="RotateCcw" className="w-3.5 h-3.5" /></div>
-                                            <span className={`text-[13px] font-black ${isRoundTrip ? 'text-blue-700' : 'text-slate-600'}`}>왕복 운행 (1.7배)</span>
+                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center border ${isRoundTrip ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-slate-50 border-slate-200 text-slate-500'}`}><Icon name="RotateCcw" className="w-3.5 h-3.5" /></div>
+                                            <span className={`text-[13px] font-black ${isRoundTrip ? 'text-blue-800' : 'text-slate-700'}`}>왕복 운행 (1.7배)</span>
                                         </div>
                                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isRoundTrip ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white'}`}>
                                             {isRoundTrip && <div className="w-1 h-1 bg-white rounded-full" />}
                                         </div>
                                     </div>
-                                    <div className="p-5 bg-slate-50 rounded-[28px] flex items-center justify-between">
+                                    <div className="p-5 bg-white border-2 border-slate-200 rounded-[28px] flex items-center justify-between shadow-sm">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center border border-slate-100 text-slate-400"><Icon name="MapPin" className="w-3.5 h-3.5" /></div>
-                                            <span className="text-[13px] font-black text-slate-600">경유지 (+1만)</span>
+                                            <div className="w-6 h-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-500"><Icon name="MapPin" className="w-3.5 h-3.5" /></div>
+                                            <span className="text-[13px] font-black text-slate-700">경유지 (+1만)</span>
                                         </div>
-                                        <div className="flex items-center gap-4 bg-white px-3 py-1.5 rounded-xl border border-slate-200">
-                                            <button onClick={() => setWaypointCount(Math.max(0, waypointCount - 1))} className="text-slate-300 hover:text-blue-500"><Icon name="Minus" className="w-3.5 h-3.5" /></button>
+                                        <div className="flex items-center gap-4 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                                            <button onClick={() => setWaypointCount(Math.max(0, waypointCount - 1))} className="text-slate-400 hover:text-blue-600"><Icon name="Minus" className="w-3.5 h-3.5" /></button>
                                             <span className="text-xs font-black text-blue-600 min-w-[20px] text-center">{waypointCount}</span>
-                                            <button onClick={() => setWaypointCount(waypointCount + 1)} className="text-slate-300 hover:text-blue-500"><Icon name="Plus" className="w-3.5 h-3.5" /></button>
+                                            <button onClick={() => setWaypointCount(waypointCount + 1)} className="text-slate-400 hover:text-blue-600"><Icon name="Plus" className="w-3.5 h-3.5" /></button>
                                         </div>
                                     </div>
-                                    <div className="p-2 bg-slate-50 rounded-[28px] flex items-center gap-2">
-                                        <button onClick={() => setWeatherType(weatherType === 'rain' ? 'none' : 'rain')} className={`flex-1 py-3 px-2 rounded-[22px] text-xs font-bold flex items-center justify-center gap-2 transition-all ${weatherType === 'rain' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}>
-                                            <Icon name="CloudRain" className="w-4 h-4" /> 우천시 (+20%)
-                                        </button>
+                                    <div className={`p-5 rounded-[28px] border-2 transition-all flex items-center justify-between cursor-pointer shadow-sm ${weatherType === 'rain' ? 'bg-blue-50 border-blue-600' : 'bg-white border-slate-200 hover:border-blue-400'}`} onClick={() => setWeatherType(weatherType === 'rain' ? 'none' : 'rain')}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center border ${weatherType === 'rain' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-slate-50 border-slate-200 text-slate-500'}`}><Icon name="CloudRain" className="w-3.5 h-3.5" /></div>
+                                            <span className={`text-[13px] font-black ${weatherType === 'rain' ? 'text-blue-800' : 'text-slate-700'}`}>기상할증 (+20%)</span>
+                                        </div>
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${weatherType === 'rain' ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white'}`}>
+                                            {weatherType === 'rain' && <div className="w-1 h-1 bg-white rounded-full" />}
+                                        </div>
+                                    </div>
+                                    <div className="p-5 bg-white border-2 border-slate-200 rounded-[28px] flex items-center justify-between shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-6 h-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-500"><Icon name="Plus" className="w-3.5 h-3.5" /></div>
+                                            <span className="text-[13px] font-black text-slate-700">옵션가(탑/윙 등등) (+1만)</span>
+                                        </div>
+                                        <div className="flex items-center gap-4 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                                            <button onClick={() => setExtraOptionCount(Math.max(0, extraOptionCount - 1))} className="text-slate-400 hover:text-blue-600"><Icon name="Minus" className="w-3.5 h-3.5" /></button>
+                                            <span className="text-xs font-black text-blue-600 min-w-[20px] text-center">{extraOptionCount}</span>
+                                            <button onClick={() => setExtraOptionCount(extraOptionCount + 1)} className="text-slate-400 hover:text-blue-600"><Icon name="Plus" className="w-3.5 h-3.5" /></button>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
                         </div>
 
-                        {/* 우측 견적 요약 영역 (한글화) */}
+                        {/* 우측 견적 요약 영역 */}
                         <div className="lg:col-span-4 lg:sticky lg:top-10">
                             <div className="bg-[#1E293B] rounded-[48px] p-10 text-white shadow-2xl border border-slate-800 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500 opacity-[0.05] rounded-full -mr-20 -mt-20 blur-3xl" />
@@ -590,8 +574,9 @@
                                             <div className="flex flex-wrap gap-2 justify-end">
                                                 {isRoundTrip && <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-md font-black text-[11px]">왕복</span>}
                                                 {waypointCount > 0 && <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-md font-black text-[11px]">경유{waypointCount}</span>}
-                                                {weatherType !== 'none' && <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md font-black text-[11px]">우천</span>}
-                                                {!isRoundTrip && waypointCount === 0 && weatherType === 'none' && <span className="opacity-50 text-[11px]">일반운임</span>}
+                                                {weatherType !== 'none' && <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md font-black text-[11px]">기상할증</span>}
+                                                {extraOptionCount > 0 && <span className="px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded-md font-black text-[11px]">탑/윙 등 옵션{extraOptionCount}</span>}
+                                                {!isRoundTrip && waypointCount === 0 && weatherType === 'none' && extraOptionCount === 0 && <span className="opacity-50 text-[11px]">일반운임</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -613,18 +598,47 @@
                         </div>
                     </main>
 
+                    {/* 주소 검색 모달 */}
                     {isPostcodeVisible && (
                         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[99999] flex items-center justify-center p-6" onClick={(e) => { if(e.target === e.currentTarget) setIsPostcodeVisible(false); }}>
                             <div className="bg-white w-full max-w-xl rounded-[48px] overflow-hidden shadow-2xl flex flex-col h-[650px] animate-in zoom-in-95 duration-300">
-                                <div className="p-8 border-b flex justify-between items-center bg-white">
+                                <div className="p-8 border-b border-slate-200 flex justify-between items-center bg-white">
                                     <div className="flex items-center gap-4">
                                         <div className="bg-blue-50 p-3 rounded-2xl text-blue-600"><Icon name="Search" className="w-6 h-6" /></div>
                                         <span className="text-xl font-black text-slate-900 tracking-tight">{postcodeTarget === 'start' ? '상차지' : '하차지'} 위치 검색</span>
                                     </div>
-                                    <button onClick={() => setIsPostcodeVisible(false)} className="p-3 hover:bg-slate-50 rounded-full transition-colors text-slate-300"><Icon name="X" className="w-7 h-7"/></button>
+                                    <button onClick={() => setIsPostcodeVisible(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Icon name="X" className="w-7 h-7"/></button>
                                 </div>
                                 <div ref={postcodeContainerRef} className="w-full flex-1 bg-white relative"></div>
-                                <div className="p-6 bg-slate-50/50 text-center text-[11px] text-slate-400 font-black uppercase tracking-[0.2em] border-t border-slate-100"> 스마트 위치 검색 엔진 </div>
+                                <div className="p-6 bg-slate-50 text-center text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] border-t border-slate-200"> 스마트 위치 검색 엔진 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 상세 차종 선택 모달 */}
+                    {isTypeModalVisible && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4 sm:p-6" onClick={(e) => { if(e.target === e.currentTarget) setIsTypeModalVisible(false); }}>
+                            <div className="bg-white w-full max-w-4xl rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 border border-slate-200">
+                                <div className="p-6 sm:p-8 border-b border-slate-200 flex justify-between items-center bg-white sticky top-0 z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="bg-blue-50 p-3 rounded-2xl text-blue-600"><Icon name="Truck" className="w-6 h-6" /></div>
+                                        <span className="text-xl font-black text-slate-900 tracking-tight">상세 차종 선택</span>
+                                    </div>
+                                    <button onClick={() => setIsTypeModalVisible(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Icon name="X" className="w-7 h-7"/></button>
+                                </div>
+                                <div className="p-6 overflow-y-auto custom-scrollbar bg-slate-50">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                        {VEHICLE_TYPES.map(opt => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => { setSelectedType(opt); setIsTypeModalVisible(false); }}
+                                                className={`p-3.5 rounded-2xl font-bold text-sm transition-all border-2 ${selectedType.id === opt.id ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}
+                                            >
+                                                {opt.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
