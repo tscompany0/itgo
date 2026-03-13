@@ -299,7 +299,7 @@
                 total += selectedMethod.price;
                 if (isPassenger) total += 10000;
                 if (waypointCount > 0) total += (waypointCount * 10000);
-                if (extraOptionCount > 0) total += (extraOptionCount * 10000);
+                total += (extraOptionCount * 10000);
                 if (isRoundTrip) total *= 1.7;
                 if (weatherType !== 'none') total *= 1.2;
 
@@ -319,7 +319,25 @@
                 const endNameStr = endInfo.name ? `\n- 고객명(상호): ${endInfo.name}` : '';
                 const endPhoneStr = endInfo.phone ? `\n- 연락처: ${endInfo.phone}` : '';
 
-                const text = `[화물 운송 견적서]\n\n[출발지 (상차)]\n- 주소: ${startPoint.address || '미지정'}${startNameStr}${startPhoneStr}\n\n[도착지 (하차)]\n- 주소: ${endPoint.address || '미지정'}${endNameStr}${endPhoneStr}\n\n[운송 정보]\n- 차량: ${selectedCategory.name} ${selectedCategory.id === 'truck' ? selectedTon.name : ''}\n- 거리: ${distance}km (계산기준: ${Math.ceil(distance/5)*5}km)\n- 예상운임: ${formatPrice(calculation)}원`;
+                let vehicleText = `${selectedCategory.name}`;
+                if (selectedCategory.id === 'truck') {
+                    vehicleText += ` ${selectedTon.name} [${selectedType.name}]`;
+                } else if (selectedCategory.id === 'labo') {
+                    vehicleText += ` [${selectedType.name}]`;
+                }
+
+                const optionsArr = [];
+                if (selectedMethod.id !== 'basic') optionsArr.push(selectedMethod.name);
+                if (isPassenger) optionsArr.push('동승 1인');
+                if (isRoundTrip) optionsArr.push('왕복 운행');
+                if (waypointCount > 0) optionsArr.push(`경유지 ${waypointCount}곳`);
+                if (weatherType !== 'none') optionsArr.push('기상할증');
+                if (extraOptionCount > 0) optionsArr.push(`옵션가(탑/윙 등) +${extraOptionCount}만`);
+                else if (extraOptionCount < 0) optionsArr.push(`요금 차감 ${extraOptionCount}만`);
+
+                const optionsText = optionsArr.length > 0 ? `\n- 추가 옵션: ${optionsArr.join(', ')}` : '\n- 추가 옵션: 없음';
+
+                const text = `[화물 운송 견적서]\n\n[출발지 (상차)]\n- 주소: ${startPoint.address || '미지정'}${startNameStr}${startPhoneStr}\n\n[도착지 (하차)]\n- 주소: ${endPoint.address || '미지정'}${endNameStr}${endPhoneStr}\n\n[운송 정보]\n- 차량: ${vehicleText}\n- 거리: ${distance}km (계산기준: ${Math.ceil(distance/5)*5}km)${optionsText}\n\n- 예상운임: ${formatPrice(calculation)}원`;
 
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
@@ -528,10 +546,10 @@
                                     <div className="p-5 bg-white border-2 border-slate-200 rounded-[28px] flex items-center justify-between shadow-sm">
                                         <div className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-500"><Icon name="Plus" className="w-3.5 h-3.5" /></div>
-                                            <span className="text-[13px] font-black text-slate-700">옵션가(탑/윙 등등) (+1만)</span>
+                                            <span className="text-[13px] font-black text-slate-700">옵션가(탑/윙 등) (±1만)</span>
                                         </div>
                                         <div className="flex items-center gap-4 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-                                            <button onClick={() => setExtraOptionCount(Math.max(0, extraOptionCount - 1))} className="text-slate-400 hover:text-blue-600"><Icon name="Minus" className="w-3.5 h-3.5" /></button>
+                                            <button onClick={() => setExtraOptionCount(extraOptionCount - 1)} className="text-slate-400 hover:text-blue-600"><Icon name="Minus" className="w-3.5 h-3.5" /></button>
                                             <span className="text-xs font-black text-blue-600 min-w-[20px] text-center">{extraOptionCount}</span>
                                             <button onClick={() => setExtraOptionCount(extraOptionCount + 1)} className="text-slate-400 hover:text-blue-600"><Icon name="Plus" className="w-3.5 h-3.5" /></button>
                                         </div>
@@ -575,7 +593,7 @@
                                                 {isRoundTrip && <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-md font-black text-[11px]">왕복</span>}
                                                 {waypointCount > 0 && <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-md font-black text-[11px]">경유{waypointCount}</span>}
                                                 {weatherType !== 'none' && <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md font-black text-[11px]">기상할증</span>}
-                                                {extraOptionCount > 0 && <span className="px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded-md font-black text-[11px]">탑/윙 등 옵션{extraOptionCount}</span>}
+                                                {extraOptionCount !== 0 && <span className={`px-2 py-0.5 rounded-md font-black text-[11px] ${extraOptionCount > 0 ? 'bg-pink-500/20 text-pink-400' : 'bg-emerald-500/20 text-emerald-400'}`}>옵션 {extraOptionCount > 0 ? '+' : ''}{extraOptionCount}만</span>}
                                                 {!isRoundTrip && waypointCount === 0 && weatherType === 'none' && extraOptionCount === 0 && <span className="opacity-50 text-[11px]">일반운임</span>}
                                             </div>
                                         </div>
